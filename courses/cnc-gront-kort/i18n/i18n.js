@@ -18,7 +18,7 @@ const api=window.cncI18n={lang,app,
 window.cncT=api.t;
 /* versionen i programmet och kontroll av nyare version (i bakgrunden, högst var tolfte timme) */
 const ME=document.currentScript&&document.currentScript.src;
-const REPO='Sharrot83/Kursbibliotek-CNC',REL='https://github.com/'+REPO+'/releases/latest';
+const REPO='Sharrot83/G-Vis',REL='https://github.com/'+REPO+'/releases/latest';
 api.releases=REL;
 api.version=async function(){if(!app)return null;
   try{if(window.__TAURI__&&window.__TAURI__.app&&window.__TAURI__.app.getVersion)return await window.__TAURI__.app.getVersion();}catch(e){}
