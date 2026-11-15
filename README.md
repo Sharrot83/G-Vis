@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="courses/cnc-gront-kort/g-vis-dela.png" alt="G-vis – G-code visualizer and CNC simulator" width="720">
+  <img src="courses/cnc-gront-kort/g-vis-dela-en.png" alt="G-vis – G-code visualizer and CNC simulator" width="720">
 </p>
 
 <h1 align="center">G-vis</h1>
