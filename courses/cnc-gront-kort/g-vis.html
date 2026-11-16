@@ -6865,7 +6865,7 @@ function menus(){return [
  {t:'Simulering',i:[{l:'Spela',a:click('playBtn')},{l:'Paus',a:click('pauseBtn')},{l:'Stoppa',a:click('stopBtn')},{l:'Singel block',a:click('singleBlockBtn')},{sep:1},
    {l:'M1 valfritt stopp',...chkBox('toggleOptionalStop')},
    {l:'Hastighet',sub:[0.5,1,2,4].map(v=>({l:String(v).replace('.',',')+'×',c:()=>Math.abs(parseFloat($('speedSlider').value)-v)<1e-6,a:()=>{const e=$('speedSlider');e.value=v;e.dispatchEvent(new Event('input'));}}))},
-   {sep:1},{l:'Ämne, material och fysik …',a:()=>{if(window.ritaShown&&!window.ritaShown('insp'))window.ritaToggle('insp');const b=document.querySelector('[data-it="amne"]');if(b)b.click();}},{l:'Hemposition …',a:click('homepos')},{l:'Rita ämnet med grafikkortet (snabbare)',c:()=>!window.gvGpu||gvGpu.on,a:()=>gvGpu.set(!gvGpu.on)},{l:'Ämnets upplösning',sub:[{hd:'Ämnets upplösning'}].concat(Object.entries(STOCK_RES_OPTS).map(([k,r])=>({l:r.name+(k==='n'?' (snabbast)':k==='h'?' (2× fler punkter)':' (3,5× fler punkter)'),c:()=>stockResKey===k,a:()=>{statusEl.textContent='Bygger om ämnet …';setTimeout(()=>setStockRes(k),30);}}))).concat([{note:'Hög och Ultra ger skarpare kanter, finare ytor och tydligare fräsmärken men kräver mer av datorn. Börja med Normal om datorn är äldre.'}])},{l:'Dialekt',sub:[['fanuc','Fanuc'],['haas','Hass'],['linuxcnc','LinuxCNC'],['iso','ISO (DIN 66025)']].map(([k,n])=>({l:n,c:()=>window.RITA_DIALECT===k,a:()=>{const s=document.getElementById('rtDialect');s.value=k;s.dispatchEvent(new Event('change'));}}))},{l:'Fysik: kraft, brott och värme',...chkBox('cncPhysOn')},
+   {sep:1},{l:'Hemposition …',a:click('homepos')},{l:'Rita ämnet med grafikkortet (snabbare)',c:()=>!window.gvGpu||gvGpu.on,a:()=>gvGpu.set(!gvGpu.on)},{l:'Ämnets upplösning',sub:[{hd:'Ämnets upplösning'}].concat(Object.entries(STOCK_RES_OPTS).map(([k,r])=>({l:r.name+(k==='n'?' (snabbast)':k==='h'?' (2× fler punkter)':' (3,5× fler punkter)'),c:()=>stockResKey===k,a:()=>{statusEl.textContent='Bygger om ämnet …';setTimeout(()=>setStockRes(k),30);}}))).concat([{note:'Hög och Ultra ger skarpare kanter, finare ytor och tydligare fräsmärken men kräver mer av datorn. Börja med Normal om datorn är äldre.'}])},{l:'Dialekt',sub:[['fanuc','Fanuc'],['haas','Hass'],['linuxcnc','LinuxCNC'],['iso','ISO (DIN 66025)']].map(([k,n])=>({l:n,c:()=>window.RITA_DIALECT===k,a:()=>{const s=document.getElementById('rtDialect');s.value=k;s.dispatchEvent(new Event('change'));}}))},{l:'Fysik: kraft, brott och värme',...chkBox('cncPhysOn')},
    {l:'Ljud',c:()=>!!(window.CNCLJUD&&CNCLJUD.on),a:()=>{if(window.CNCLJUD)CNCLJUD.setOn(!CNCLJUD.on);}}]},
  {t:'Verktyg',i:[{l:'Verktygsmagasin …',k:'Ctrl+M',a:()=>window.ritaMagOpen&&window.ritaMagOpen()},{l:'Lathund G/M …',a:click('cheatsheetBtn')},{l:'Lathund skärdata …',a:click('skardataBtn')}]},
  {t:'Kurser',i:(window.ritaKursMenu?window.ritaKursMenu():[{l:'Kurserna laddas …',dis:true}])},
@@ -8274,7 +8274,7 @@ function drawStats(){let feed=0,rap=0,tc=0,lastT=null;(paths||[]).forEach(s=>{if
   if(lastT!==null)tc++;
   const m=v=>v>=1000?nf(v/1000,1)+' m':nf(v,0)+' mm',t=playModel?playModel.totalTime:0;
   $('inspFeed').textContent=m(feed);$('inspRap').textContent=m(rap);$('inspTc').textContent=tc;$('inspTime').textContent=Math.floor(t/60)+':'+String(Math.round(t%60)).padStart(2,'0');}
-function draw(){if(INS.hidden)return;try{drawWarn();}catch(e){}try{if(tab==='verk')drawTools();}catch(e){}try{if(tab==='amne'&&!INS.contains(document.activeElement))drawStock();}catch(e){}try{drawStats();}catch(e){}}
+function draw(){if(INS.hidden)return;try{drawWarn();}catch(e){}try{if(tab==='verk')drawTools();}catch(e){}try{const sb=$('inspStock');if(tab==='amne'&&(!sb.firstChild||!sb.contains(document.activeElement)))drawStock();}catch(e){console.error('Ämne:',e);}try{drawStats();}catch(e){}}
 window.ritaInspDraw=draw;
 const _d=drawFromText;drawFromText=function(){const r=_d.apply(this,arguments);try{draw();}catch(e){}return r;};
 new MutationObserver(()=>{try{drawWarn();}catch(e){}}).observe($('warnList'),{childList:true,subtree:true});
@@ -8286,6 +8286,10 @@ function vis(){let i=true,t=true;try{i=localStorage.getItem('rita-insp')!=='0';t
 window.ritaToggle=(k)=>{const key=k==='insp'?'rita-insp':'rita-tidslinje';let on=true;try{on=localStorage.getItem(key)!=='0';localStorage.setItem(key,on?'0':'1');}catch(e){}vis();};
 window.ritaShown=(k)=>{try{return localStorage.getItem(k==='insp'?'rita-insp':'rita-tidslinje')!=='0';}catch(e){return true;}};
 vis();setTab(tab);
+/* fliken Ämne ska alltid ha innehåll: rita igen när sidan, materialen och introt är klara */
+const ensure=()=>{try{if(tab==='amne'&&!INS.hidden&&!$('inspStock').firstChild)drawStock();}catch(e){console.error('Ämne:',e);}};
+addEventListener('load',()=>{ensure();setTimeout(ensure,600);setTimeout(ensure,2500);});
+new MutationObserver(ensure).observe(INS,{attributes:true,attributeFilter:['hidden']});
 })();
 
 /* ---------- helskärm: Esc stänger ---------- */
@@ -8739,7 +8743,7 @@ window.gvMeasure={toggle};
 </section>
 
 <section id="gg-amne"><h2>Ämnet, material och fysik</h2>
-<p>Ämnet ställs in i inspektörens flik <b>Ämne</b>, som också nås via <b>Simulering → Ämne, material och fysik</b>.</p>
+<p>Ämnet ställs in i inspektörens flik <b>Ämne</b> till höger.</p>
 <ul>
 <li><b>X från/till, Y från/till, Z botten och Z råyta</b> anges i programmets koordinater (G54), och sedan trycker du på <b>Använd råämnet</b>. Z0 är normalt den färdiga överytan.</li>
 <li><b>Enklare</b>: ange längd, bredd och höjd, eller välj rund, och klicka sedan i rutan var nollpunkten ska sitta: ett av hörnen 1–4 eller mitten.</li>
