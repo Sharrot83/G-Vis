@@ -43,6 +43,17 @@
       "webviewInstallMode": {
         "type": "embedBootstrapper"
       }
-    }
+    },
+    "fileAssociations": [
+      {
+        "ext": [
+          "gvis"
+        ],
+        "name": "G-vis",
+        "description": "G-vis program (G-code with tools, stock and material)",
+        "role": "Editor",
+        "mimeType": "application/x-gvis"
+      }
+    ]
   }
 }

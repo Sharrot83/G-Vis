@@ -1061,7 +1061,7 @@
 
     <div class="status" id="status"></div>
 
-    <input type="file" id="fileInput" accept=".nc,.gcode,.tap,.txt,.cnc,.ngc">
+    <input type="file" id="fileInput" accept=".gvis,.nc,.gcode,.tap,.txt,.cnc,.ngc,.h,.mpf">
   </section>
   <div class="rt-split" id="rtSplit" role="separator" aria-orientation="vertical" aria-label="Dra för att ändra kodfältets bredd" tabindex="0" title="Dra för att ändra bredd. Dubbelklicka för att återställa."></div>
   <section class="right">
@@ -5566,7 +5566,7 @@ fileInput.addEventListener('change', ()=>{
 });
 
 function saveGcode() {
-  let text = typeof fileText==='function' ? fileText() : ta.value;
+  let text = ta.value;
   const blob = new Blob([text], {type:'text/plain'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -6853,7 +6853,7 @@ const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 function examples(){const bs=[...document.querySelectorAll('#exampleMenu button')];if(bs.length){const cats=[];bs.forEach(b=>{const c=b.dataset.cat||'Exempel';let g=cats.find(x=>x.l===c);if(!g){g={l:c,sub:[]};cats.push(g);}g.sub.push({l:b.textContent.trim(),a:()=>b.click()});});return cats;}
   return bs.length?bs.map(b=>({l:b.textContent.trim(),a:()=>b.click()})):[{l:'Inga exempel',dis:true}];}
 function menus(){return [
- {t:'Arkiv',i:[{l:'Öppna',k:'Ctrl+O',a:click('openBtn')},{l:'Spara',k:'Ctrl+S',a:click('saveBtn')},{l:'Spara som …',k:'Ctrl+Shift+S',a:()=>window.gvFile&&gvFile.saveAs()},{l:'Spara för maskinen …',a:()=>window.gvSaveMachine&&gvSaveMachine()},{l:'Spara verktyg, ämne och material i filen',c:()=>!window.gvSetupOn||gvSetupOn(),a:()=>{const on=!(window.gvSetupOn&&gvSetupOn());try{localStorage.setItem('gvis-spara-upps',on?'1':'0');}catch(e){}statusEl.textContent=on?'Verktygsmagasinet, råämnet och materialet sparas i filen.':'Bara G-koden sparas i filen.';}},{sep:1},
+ {t:'Arkiv',i:[{l:'Öppna',k:'Ctrl+O',a:click('openBtn')},{l:'Spara',k:'Ctrl+S',a:click('saveBtn')},{l:'Spara .gvis …',k:'Ctrl+Shift+S',a:()=>window.gvFile&&gvFile.saveGvis()},{l:'Spara .nc …',k:'Ctrl+Alt+S',a:()=>window.gvFile&&gvFile.saveNc()},{sep:1},
    {l:'Rensa',a:click('clearBtn')},{sep:1},{l:'Översätt till dialekt',sub:[['fanuc','Fanuc'],['haas','Hass'],['linuxcnc','LinuxCNC'],['iso','ISO (DIN 66025)']].map(([k,n])=>({l:n+(window.RITA_DIALECT===k?' (nuvarande)':''),a:()=>window.ritaTranslateTo&&window.ritaTranslateTo(k)}))},{sep:1},{l:'Tillbaka till CNC-Grönt kort',a:()=>{location.href='material.html';}}]},
  {t:'Exempel',i:[...examples(),{sep:1},{l:'Ritningar att öva på …',a:click('drawingsBtn')}]},
  {t:'Visa',i:[{l:'Rita G-kod',k:'Ctrl+Enter',a:click('drawBtn')},{l:'Anpassa vy',a:click('fitBtn')},{sep:1},
@@ -8517,15 +8517,19 @@ if(introOn&&!window.__gvSkipIntro&&!/[?&]utanintro=1/.test(location.search))star
 (function(){
 const LSK='gvis-kod-v1';
 const FS=!!(window.showSaveFilePicker&&window.showOpenFilePicker);   // Chrome och Edge: skriva direkt till filen
-const TYPES=[{description:'G-kod',accept:{'text/plain':['.nc','.tap','.ngc','.txt','.cnc','.gcode','.h','.mpf']}}];
-let fileName='program.nc',handle=null,dirty=false,saveT=0,pendingName=null,quiet=false;
+const T_NC=[{description:'G-kod',accept:{'text/plain':['.nc','.tap','.ngc','.txt','.cnc','.gcode','.h','.mpf']}}];
+const T_GVIS=[{description:'G-vis-fil (G-kod, verktyg, ämne och material)',accept:{'text/plain':['.gvis']}}];
+const TYPES=[{description:'G-vis och G-kod',accept:{'text/plain':['.gvis','.nc','.tap','.ngc','.txt','.cnc','.gcode','.h','.mpf']}}];
+let fileName='program.gvis',handle=null,dirty=false,saveT=0,pendingName=null,quiet=false;
 const kurs=()=>!!(window.ritaKurs&&window.ritaKurs.on);
-/* G-vis-raden överst i filen: verktygsmagasinet, råämnet och materialet. Den kan stängas av under Arkiv,
-   och Spara för maskinen sparar alltid utan den. */
-window.gvSetupOn=function(){try{return localStorage.getItem('gvis-spara-upps')!=='0';}catch(e){return true;}};
+/* Två filformat:
+   .gvis  G-koden med en G-vis-rad överst: verktygsmagasinet, råämnet och materialet kommer tillbaka när filen öppnas.
+   .nc    (och .tap, .gcode …) bara G-koden, ren för maskinen och andra program.
+   Spara (Ctrl+S) skriver till den öppna filen i dess eget format. */
+const isGvis=n=>/\.gvis$/i.test(n||'');
+const base=n=>(n||'program').replace(/\.[^.]+$/,'')||'program';
 function setupLine(){return '(GKODVIZ:SETUP:'+utf8ToBase64(JSON.stringify({v:1,tools:toolTable,stock:stockSize,mat:(typeof phSettings!=='undefined'?phSettings.mat:null)}))+')\n';}
-let plainOnce=false;
-function fileText(){let t=ta.value;if(plainOnce||!gvSetupOn())return t;try{t=setupLine()+t;}catch(e){}return t;}
+function fileText(name){let t=ta.value;if(!isGvis(name===undefined?fileName:name))return t;try{t=setupLine()+t;}catch(e){}return t;}
 window.gvFileText=fileText;
 function saveLocal(){if(kurs())return;try{localStorage.setItem(LSK,JSON.stringify({code:ta.value,fileName,t:Date.now()}));}catch(e){}}
 function label(){return (handle?'📄 ':'')+fileName+(dirty?' •':'');}
@@ -8535,36 +8539,46 @@ ta.addEventListener('input',()=>{if(!kurs())mark(true);clearTimeout(saveT);saveT
 addEventListener('pagehide',saveLocal);addEventListener('beforeunload',saveLocal);
 /* kod som läggs in (exempel, ritningar, lexikonet, kurser) är ingen fil: Spara frågar då efter ett nytt filnamn */
 const _load=loadTextIntoEditor;
-loadTextIntoEditor=function(text){const r=_load.apply(this,arguments);if(!quiet){if(pendingName){fileName=pendingName;pendingName=null;handle=null;}else{handle=null;fileName='program.nc';}mark(false);saveLocal();}return r;};
+loadTextIntoEditor=function(text){const r=_load.apply(this,arguments);if(!quiet){if(pendingName){fileName=pendingName;pendingName=null;handle=null;}else{handle=null;fileName='program.gvis';}mark(false);saveLocal();}return r;};
 async function writeHandle(){const w=await handle.createWritable();await w.write(fileText());await w.close();mark(false);saveLocal();statusEl.textContent='Sparat till '+handle.name+'.';}
 function download(){const b=new Blob([fileText()],{type:'text/plain'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=fileName;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);mark(false);saveLocal();statusEl.textContent='Laddade ned '+fileName+'.';}
-async function save(as){saveLocal();plainOnce=false;
-  if(FS){try{if(!handle||as){handle=await window.showSaveFilePicker({suggestedName:fileName,types:TYPES});fileName=handle.name;}await writeHandle();return;}
+async function save(){saveLocal();
+  if(FS){try{if(!handle)return saveAs(isGvis(fileName)?'gvis':'nc');await writeHandle();return;}
     catch(e){if(e&&e.name==='AbortError')return;handle=null;}}
   download();}
+/* Spara .gvis … och Spara .nc …: välj en ny fil i det formatet. Den blir sedan den öppna filen. */
+async function saveAs(kind){saveLocal();const name=base(fileName)+(kind==='gvis'?'.gvis':'.nc');
+  if(FS){try{const h=await window.showSaveFilePicker({suggestedName:name,types:kind==='gvis'?T_GVIS:T_NC});handle=h;fileName=h.name;await writeHandle();
+      statusEl.textContent='Sparat till '+h.name+(isGvis(h.name)?' med verktyg, ämne och material.':' (bara G-koden).');return;}
+    catch(e){if(e&&e.name==='AbortError')return;handle=null;}}
+  fileName=name;download();statusEl.textContent='Laddade ned '+name+(kind==='gvis'?' med verktyg, ämne och material.':' (bara G-koden).');}
 async function open(){
   if(FS){try{const [h]=await window.showOpenFilePicker({types:TYPES});const f=await h.getFile(),txt=await f.text();pendingName=f.name;loadTextIntoEditor(txt);handle=h;fileName=f.name;mark(false);saveLocal();statusEl.textContent='Öppnade '+f.name+'. Spara (Ctrl+S) skriver tillbaka till filen.';return;}
     catch(e){if(e&&e.name==='AbortError')return;}}
   fileInput.click();}
 fileInput.addEventListener('change',()=>{const f=fileInput.files&&fileInput.files[0];if(f)pendingName=f.name;},true);
-/* Spara för maskinen: bara G-koden, utan G-vis-raden, som en ny fil */
-async function saveMachine(){saveLocal();plainOnce=true;const keepH=handle,keepN=fileName;
-  const base=fileName.replace(/\.[^.]+$/,'');fileName=base+'.nc';
-  try{if(FS){try{const h=await window.showSaveFilePicker({suggestedName:fileName,types:TYPES});const w=await h.createWritable();await w.write(ta.value);await w.close();statusEl.textContent='Sparat för maskinen till '+h.name+' (bara G-koden).';}
-      catch(e){if(!(e&&e.name==='AbortError'))throw e;}}
-    else{const b=new Blob([ta.value],{type:'text/plain'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=fileName;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);statusEl.textContent='Laddade ned '+fileName+' för maskinen (bara G-koden).';}}
-  finally{plainOnce=false;handle=keepH;fileName=keepN;mark(dirty);}}
-window.gvSaveMachine=saveMachine;
 const stop=e=>{e.stopImmediatePropagation();e.preventDefault();};
 document.getElementById('openBtn').addEventListener('click',e=>{stop(e);open();},true);
 document.getElementById('saveBtn').addEventListener('click',e=>{stop(e);save(false);},true);
-document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.shiftKey&&!e.altKey&&e.key.toLowerCase()==='s'){e.preventDefault();e.stopImmediatePropagation();save(true);}},true);
+document.addEventListener('keydown',e=>{if(!(e.ctrlKey||e.metaKey)||e.code!=='KeyS')return;
+  if(e.shiftKey&&!e.altKey){e.preventDefault();e.stopImmediatePropagation();saveAs('gvis');}else if(e.altKey&&!e.shiftKey){e.preventDefault();e.stopImmediatePropagation();saveAs('nc');}},true);
 /* skärmsläckaren startar: spara till filen om koden har ändrats sedan den sparades */
 document.addEventListener('gv-saver-start',()=>{saveLocal();if(handle&&dirty)writeHandle().catch(()=>{});});
-window.gvFile={save:()=>save(false),saveAs:()=>save(true),open,get name(){return fileName;},get dirty(){return dirty;},get handle(){return !!handle;}};
+window.gvFile={save:()=>save(),saveAs:()=>saveAs('gvis'),saveGvis:()=>saveAs('gvis'),saveNc:()=>saveAs('nc'),open,get name(){return fileName;},get dirty(){return dirty;},get handle(){return !!handle;}};
+/* programmet: en .gvis-fil som öppnats med dubbelklick. Spara skriver tillbaka till samma fil via programmet. */
+function pathHandle(f){let buf='';return {name:f.name,path:f.path,createWritable:async()=>({write:async t=>{buf=t;},close:async()=>{await window.__TAURI__.core.invoke('gvis_write_file',{path:f.path,text:buf});}})};}
+async function openPending(){const T=window.__TAURI__;if(!T||!T.core)return;let f=null;
+  try{f=await T.core.invoke('gvis_take_pending');}catch(e){statusEl.textContent='Det gick inte att öppna filen: '+e;return;}
+  if(!f)return;const t=window.cncT||String;
+  if(dirty&&ta.value.trim()&&!confirm(t('Koden är ändrad sedan den sparades. Öppna '+f.name+' ändå?')))return;
+  try{if(kurs()&&window.ritaKurs.end)window.ritaKurs.end();}catch(e){}
+  pendingName=f.name;loadTextIntoEditor(f.text);handle=pathHandle(f);fileName=f.name;mark(false);saveLocal();
+  statusEl.textContent='Öppnade '+f.name+'. Spara (Ctrl+S) skriver tillbaka till filen.';}
+window.gvOpenPending=openPending;
 /* öppna det som sparades senast */
-try{const s=JSON.parse(localStorage.getItem(LSK)||'null');if(s&&typeof s.code==='string'&&s.code.trim()){quiet=true;_load(s.code);quiet=false;fileName=s.fileName||'program.nc';}}catch(e){quiet=false;}
+try{const s=JSON.parse(localStorage.getItem(LSK)||'null');if(s&&typeof s.code==='string'&&s.code.trim()){quiet=true;_load(s.code);quiet=false;fileName=s.fileName||'program.gvis';}}catch(e){quiet=false;}
 mark(false);
+if(window.__TAURI__&&window.__TAURI__.core)setTimeout(openPending,0);
 })();
 </script>
 <script>
@@ -8826,13 +8840,14 @@ window.gvMeasure={toggle};
 <section id="gg-spara"><h2>Spara och öppna</h2>
 <ul>
 <li>Koden sparas automatiskt i webbläsaren medan du skriver.</li>
-<li><b>Arkiv → Öppna</b> (Ctrl+O) öppnar en fil från datorn.</li>
-<li><b>Arkiv → Spara</b> (Ctrl+S) sparar till fil. I Chrome och Edge skriver G-vis tillbaka till samma fil, utan någon ny nedladdning. I andra webbläsare laddas filen ned.</li>
-<li><b>Spara som …</b> (Ctrl+Shift+S) väljer en ny fil.</li>
+<li><b>Arkiv → Öppna</b> (Ctrl+O) öppnar en .gvis-fil eller en G-kodsfil från datorn.</li>
+<li><b>Arkiv → Spara .gvis …</b> (Ctrl+Shift+S) sparar en G-vis-fil. Den innehåller G-koden och dessutom verktygsmagasinet, råämnet och materialet, som kommer tillbaka när filen öppnas igen i G-vis.</li>
+<li><b>Arkiv → Spara .nc …</b> (Ctrl+Alt+S) sparar bara G-koden, ren för en riktig maskin och för andra program.</li>
+<li>I programmet för datorn öppnar ett <b>dubbelklick på en .gvis-fil</b> G-vis direkt med filen, och Spara skriver tillbaka till samma fil.</li>
+<li><b>Arkiv → Spara</b> (Ctrl+S) sparar till den öppna filen i dess eget format. I Chrome och Edge skriver G-vis tillbaka till samma fil, utan någon ny nedladdning. I andra webbläsare laddas filen ned.</li>
 <li>Filnamnet står längst till höger i menyraden. 📄 betyder att G-vis kan spara direkt till filen. En prick • betyder att koden är ändrad sedan den sparades.</li>
 <li>Startar skärmsläckaren medan en fil är öppen och ändrad, sparas den till filen först.</li>
 </ul>
-<p>Verktygsmagasinet, råämnet och materialet sparas i filen, på en G-vis-rad överst. När filen öppnas igen kommer samma verktyg, ämne och material tillbaka. Raden kan stängas av under <b>Arkiv → Spara verktyg, ämne och material i filen</b>. <b>Arkiv → Spara för maskinen …</b> sparar bara G-koden, som du skickar till en riktig maskin.</p>
 </section>
 
 <section id="gg-visa"><h2>Visning, ljud och skärmsläckare</h2>
@@ -8850,7 +8865,8 @@ window.gvMeasure={toggle};
 <table class="gg-keys">
 <tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Öppna fil</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Spara</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></td><td>Spara som</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></td><td>Spara .gvis</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>S</kbd></td><td>Spara .nc</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Enter</kbd></td><td>Rita G-koden</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>M</kbd></td><td>Verktygsmagasinet</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd></td><td>Sök i koden</td></tr>
