@@ -9152,6 +9152,7 @@ const $=id=>document.getElementById(id);
 const close=()=>{D.hidden=true;};D.querySelector('.gv-about-x').onclick=close;$('gvAbOk').onclick=close;D.addEventListener('click',e=>{if(e.target===D)close();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!D.hidden)close();});
 async function fill(force){const app=I&&I.app;let v=app?await I.version():null;
+  if(I&&I.storeP&&await I.storeP){$('gvAbV').textContent=(v||'')+' (Microsoft Store)';$('gvAbL').textContent='Microsoft Store';$('gvAbMsg').className='gv-about-msg';$('gvAbMsg').textContent='G-vis uppdateras automatiskt via Microsoft Store.';$('gvAbCheck').hidden=true;return;}
   $('gvAbV').textContent=app?(v||'okänd'):'Webbversion (alltid den senaste)';
   $('gvAbL').textContent='Söker …';$('gvAbMsg').textContent='';$('gvAbMsg').className='gv-about-msg';
   const L=I?await I.latest(force):null;

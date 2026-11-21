@@ -23,7 +23,10 @@ api.releases=REL;
 api.version=async function(){if(!app)return null;
   try{if(window.__TAURI__&&window.__TAURI__.app&&window.__TAURI__.app.getVersion)return await window.__TAURI__.app.getVersion();}catch(e){}
   try{const r=await fetch(new URL('../../../version.json',ME||location.href).href,{cache:'no-store'});return (await r.json()).version||null;}catch(e){return null;}};
-api.latest=async function(force){let c=null;try{c=JSON.parse(localStorage.getItem('gvis-senaste')||'null');}catch(e){}
+/* Microsoft Store: uppdateringar sköts av Store, så G-vis söker inte själv efter nya versioner och visar inga nedladdningslänkar */
+api.storeP=(app&&window.__TAURI__&&window.__TAURI__.core)?window.__TAURI__.core.invoke('gvis_is_store').catch(()=>false):Promise.resolve(false);
+api.storeP.then(v=>{api.store=!!v;if(v)document.documentElement.classList.add('is-store');});
+api.latest=async function(force){if(await api.storeP)return null;let c=null;try{c=JSON.parse(localStorage.getItem('gvis-senaste')||'null');}catch(e){}
   // en gång varje gång programmet startas (och annars högst var tolfte timme): annars kunde ett gammalt svar ligga kvar i tolv timmar
   let ses=false;try{ses=sessionStorage.getItem('gvis-kollad')==='1';}catch(e){}
   if(!force&&ses&&c&&Date.now()-c.t<12*3600e3)return c;

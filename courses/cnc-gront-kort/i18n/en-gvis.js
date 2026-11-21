@@ -2,6 +2,7 @@
 (function(){if(!window.cncI18n)return;
 const T=s=>window.cncI18n.tr(s);
 const E={
+'G-vis uppdateras automatiskt via Microsoft Store.':'G-vis is updated automatically through the Microsoft Store.',
 'Spara .gvis …':'Save .gvis …','Spara .nc …':'Save .nc …','Spara .gvis':'Save .gvis','Spara .nc':'Save .nc','G-vis-fil (G-kod, verktyg, ämne och material)':'G-vis file (G-code, tools, stock and material)','G-vis och G-kod':'G-vis and G-code',
 'G-vis – G-kodsvisualiserare och CNC-simulator':'G-vis – G-code visualizer and CNC simulator',
 'Spara för maskinen …':'Save for the machine …','Spara verktyg, ämne och material i filen':'Save tools, stock and material in the file','Verktygsmagasinet, råämnet och materialet sparas i filen.':'The tool changer, stock and material are saved in the file.','Bara G-koden sparas i filen.':'Only the G-code is saved in the file.',
@@ -170,3 +171,4 @@ window.cncI18n.add({rx:[[/^Det finns en ny version, (.+)\.$/,'A new version, $1,
 window.cncI18n.add({rx:[[/^Sparat för maskinen till (.+) \(bara G-koden\)\.$/,'Saved for the machine to $1 (G-code only).'],[/^Laddade ned (.+) för maskinen \(bara G-koden\)\.$/,'Downloaded $1 for the machine (G-code only).']]});
 window.cncI18n.add({rx:[[/^Sparat till (.+) med verktyg, ämne och material\.$/,'Saved to $1 with tools, stock and material.'],[/^Sparat till (.+) \(bara G-koden\)\.$/,'Saved to $1 (G-code only).'],[/^Laddade ned (.+) med verktyg, ämne och material\.$/,'Downloaded $1 with tools, stock and material.'],[/^Laddade ned (.+) \(bara G-koden\)\.$/,'Downloaded $1 (G-code only).']]});
 window.cncI18n.add({rx:[[/^Koden är ändrad sedan den sparades\. Öppna (.+) ändå\?$/,'The code has changed since it was saved. Open $1 anyway?'],[/^Det gick inte att öppna filen: (.*)$/,'The file could not be opened: $1']]});
+window.cncI18n.add({rx:[[/^(.*) \(Microsoft Store\)$/,'$1 (Microsoft Store)']]});

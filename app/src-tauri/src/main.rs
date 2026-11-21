@@ -78,6 +78,14 @@ fn gvis_write_file(path: String, text: String) -> Result<(), String> {
     std::fs::write(&p, text).map_err(|e| e.to_string())
 }
 
+/// Installerat från Microsoft Store (MSIX-paket i WindowsApps)? Då sköter Store uppdateringarna.
+#[tauri::command]
+fn gvis_is_store() -> bool {
+    std::env::current_exe()
+        .map(|p| p.to_string_lossy().to_lowercase().contains("\\windowsapps\\"))
+        .unwrap_or(false)
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let start = gvis_arg(&args, None);
@@ -100,7 +108,8 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             gvis_has_pending,
             gvis_take_pending,
-            gvis_write_file
+            gvis_write_file,
+            gvis_is_store
         ])
         .build(tauri::generate_context!())
         .expect("G-vis kunde inte starta")
