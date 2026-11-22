@@ -67,22 +67,4 @@ jobs:
           releaseId: ${{ github.event.release.id }}
           args: ${{ matrix.args }}
 
-      # Microsoft Store: ett MSIX-paket som laddas upp i Partner Center. Store signerar det, så Windows varnar inte.
-      - name: Paket för Microsoft Store (MSIX)
-        if: matrix.platform == 'windows-latest'
-        shell: pwsh
-        run: ./app/msix/bygg-msix.ps1
-
-      - name: Lägg MSIX-paketet på releasen
-        if: matrix.platform == 'windows-latest' && github.event_name == 'release'
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "$GITHUB_REF_NAME" app/msix/out/*.msix --clobber
-
-      - name: Spara MSIX-paketet (vid manuell körning)
-        if: matrix.platform == 'windows-latest' && github.event_name != 'release'
-        uses: actions/upload-artifact@v4
-        with:
-          name: G-vis-msix
-          path: app/msix/out/*.msix
+      # Paketet till Microsoft Store (med tilläggen) byggs i det privata repot G-Vis-Pro.

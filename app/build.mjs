@@ -19,6 +19,8 @@ const copy = (rel) => {
   'assets/fonts',
   'assets/vendor',
 ].forEach(copy);
+// tilläggen (Lärare och Verkstad) läggs bara in av bygget för Microsoft Store, från det privata repot
+if (fs.existsSync(path.join(root, 'courses/cnc-gront-kort/pro'))) copy('courses/cnc-gront-kort/pro');
 fs.copyFileSync(path.join(root, 'app', 'start.html'), path.join(dist, 'index.html'));
 fs.copyFileSync(path.join(root, 'app', 'icon.png'), path.join(dist, 'icon.png'));
 const conf = JSON.parse(fs.readFileSync(path.join(root, 'app', 'src-tauri', 'tauri.conf.json'), 'utf8'));

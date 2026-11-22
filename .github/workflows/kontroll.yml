@@ -1,0 +1,28 @@
+# Kontrollerar att programmets Rust-kod går att bygga i Windows, när något pushas till en annan gren än main och vid pull requests.
+# Snabbare än ett helt bygge: bara cargo check, inga installationsfiler.
+name: Kontroll
+
+on:
+  push:
+    branches-ignore: [main]
+    paths: ['app/**', '.github/workflows/kontroll.yml']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Programmets filer och ikoner
+        shell: bash
+        run: |
+          node app/build.mjs
+          npx --yes @tauri-apps/cli@2 icon app/icon.png --output app/src-tauri/icons
+      - name: cargo check
+        working-directory: app/src-tauri
+        run: cargo check
