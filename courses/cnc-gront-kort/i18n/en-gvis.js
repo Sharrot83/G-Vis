@@ -172,3 +172,24 @@ window.cncI18n.add({rx:[[/^Sparat för maskinen till (.+) \(bara G-koden\)\.$/,'
 window.cncI18n.add({rx:[[/^Sparat till (.+) med verktyg, ämne och material\.$/,'Saved to $1 with tools, stock and material.'],[/^Sparat till (.+) \(bara G-koden\)\.$/,'Saved to $1 (G-code only).'],[/^Laddade ned (.+) med verktyg, ämne och material\.$/,'Downloaded $1 with tools, stock and material.'],[/^Laddade ned (.+) \(bara G-koden\)\.$/,'Downloaded $1 (G-code only).']]});
 window.cncI18n.add({rx:[[/^Koden är ändrad sedan den sparades\. Öppna (.+) ändå\?$/,'The code has changed since it was saved. Open $1 anyway?'],[/^Det gick inte att öppna filen: (.*)$/,'The file could not be opened: $1']]});
 window.cncI18n.add({rx:[[/^(.*) \(Microsoft Store\)$/,'$1 (Microsoft Store)']]});
+/* uppgifter från en lärare (.gvisuppg) och elevens svar (.gvissvar) */
+(function(){const n=window.cncI18n;if(!n)return;
+const D=d=>d.replace(/^från (.+?) till (.+?) på (Z\S+)$/,'from $1 to $2 at $3').replace(/^från (.+?) till (.+)$/,'from $1 to $2').replace(/^i (.+?) ned till (Z\S+)$/,'at $1 down to $2');
+const W={borrning:'hole',båge:'arc',linje:'line'};
+n.add({exact:{'Avsluta uppgifterna':'Leave the assignments','Spara svar …':'Save answer …','Spara svar':'Save answer','Spara svaret':'Save the answer','Avbryt':'Cancel','Ditt namn':'Your name','Nästa uppgift':'Next task','Föregående':'Previous',
+ 'Alla uppgifter är klara. Spara svaret och lämna in det till läraren.':'All tasks are done. Save your answer and hand it in to your teacher.',
+ 'Uppgiften är klar. Gå vidare när du vill.':'The task is done. Go on when you are ready.',
+ 'Läraren har valt att du inte ser om svaret är rätt. Skriv programmet och spara svaret när du är klar.':'Your teacher has chosen not to show whether your answer is right. Write the program and save your answer when you are done.',
+ 'Skriv programmet som ritningen visar. Banan jämförs med lärarens bana.':'Write the program the drawing shows. Your path is compared with the teacher’s path.',
+ 'Svaret innehåller din kod för varje uppgift. Lämna in filen till läraren, till exempel i Teams eller med e-post.':'The answer holds your code for every task. Hand in the file to your teacher, for example in Teams or by email.',
+ 'Skriv ditt namn först.':'Enter your name first.','Uppgiftsfilen gick inte att läsa.':'The assignment file could not be read.',
+ 'Uppgiftsfilen är gjord i en nyare G-vis. Uppdatera G-vis och försök igen.':'The assignment file was made in a newer G-vis. Update G-vis and try again.'},
+ rx:[[/^Uppgifter · (.+)$/,'Assignments · $1'],[/^Uppgift (\d+)$/,'Task $1'],[/^Uppgift (\d+) av (\d+)$/,'Task $1 of $2'],
+  [/^Rad (\d+) går åt andra hållet jämfört med lärarens bana\.$/,'Line $1 runs the opposite way to the teacher’s path.'],
+  [/^(\d+) av (\d+) delar stämmer\.$/,'$1 of $2 parts are right.'],
+  [/^Rad (\d+) skär (.+), men det finns inte på ritningen\.$/,(m,l,d)=>'Line '+l+' cuts '+D(d)+', but that is not on the drawing.'],
+  [/^Det saknas en (borrning|båge|linje) (.+)\.$/,(m,w,d)=>'The '+W[w]+' '+D(d)+' is missing.'],
+  [/^Rad (\d+) går till rätt punkt, men bågen ser inte ut som på ritningen\. Kontrollera G02 eller G03 och radien eller I och J\.$/,'Line $1 reaches the right point, but the arc does not match the drawing. Check G02 or G03 and the radius or I and J.'],
+  [/^Du har skrivit kod i (\d+) av (\d+) uppgifter\.$/,'You have written code in $1 of $2 tasks.'],
+  [/^Svaret är sparat i (.+)\. Lämna in filen till läraren\.$/,'Your answer is saved in $1. Hand in the file to your teacher.'],
+  [/^Öppnade uppgifterna "(.+)"\.$/,'Opened the assignments "$1".']]});})();

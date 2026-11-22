@@ -53,6 +53,15 @@
         "description": "G-vis program (G-code with tools, stock and material)",
         "role": "Editor",
         "mimeType": "application/x-gvis"
+      },
+      {
+        "ext": [
+          "gvisuppg"
+        ],
+        "name": "G-vis-uppgifter",
+        "description": "G-vis assignments from a teacher",
+        "role": "Viewer",
+        "mimeType": "application/x-gvis-uppgifter"
       }
     ]
   }

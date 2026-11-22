@@ -1061,7 +1061,7 @@
 
     <div class="status" id="status"></div>
 
-    <input type="file" id="fileInput" accept=".gvis,.nc,.gcode,.tap,.txt,.cnc,.ngc,.h,.mpf">
+    <input type="file" id="fileInput" accept=".gvis,.gvisuppg,.nc,.gcode,.tap,.txt,.cnc,.ngc,.h,.mpf">
   </section>
   <div class="rt-split" id="rtSplit" role="separator" aria-orientation="vertical" aria-label="Dra för att ändra kodfältets bredd" tabindex="0" title="Dra för att ändra bredd. Dubbelklicka för att återställa."></div>
   <section class="right">
@@ -6852,7 +6852,7 @@ const chkBox=id=>({c:()=>{const e=$(id);return !!(e&&e.checked);},a:()=>{const e
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function examples(){const bs=[...document.querySelectorAll('#exampleMenu button')];if(bs.length){const cats=[];bs.forEach(b=>{const c=b.dataset.cat||'Exempel';let g=cats.find(x=>x.l===c);if(!g){g={l:c,sub:[]};cats.push(g);}g.sub.push({l:b.textContent.trim(),a:()=>b.click()});});return cats;}
   return bs.length?bs.map(b=>({l:b.textContent.trim(),a:()=>b.click()})):[{l:'Inga exempel',dis:true}];}
-function menus(){return [
+function menus(){const L=[
  {t:'Arkiv',i:[{l:'Öppna',k:'Ctrl+O',a:click('openBtn')},{l:'Spara',k:'Ctrl+S',a:click('saveBtn')},{l:'Spara .gvis …',k:'Ctrl+Shift+S',a:()=>window.gvFile&&gvFile.saveGvis()},{l:'Spara .nc …',k:'Ctrl+Alt+S',a:()=>window.gvFile&&gvFile.saveNc()},{sep:1},
    {l:'Rensa',a:click('clearBtn')},{sep:1},{l:'Översätt till dialekt',sub:[['fanuc','Fanuc'],['haas','Hass'],['linuxcnc','LinuxCNC'],['iso','ISO (DIN 66025)']].map(([k,n])=>({l:n+(window.RITA_DIALECT===k?' (nuvarande)':''),a:()=>window.ritaTranslateTo&&window.ritaTranslateTo(k)}))},{sep:1},{l:'Tillbaka till CNC-Grönt kort',a:()=>{location.href='material.html';}}]},
  {t:'Exempel',i:[...examples(),{sep:1},{l:'Ritningar att öva på …',a:click('drawingsBtn')}]},
@@ -6873,7 +6873,7 @@ function menus(){return [
    {hd:'Uppslag'},{l:'G-koder',a:lex('g-koder')},{l:'M-koder',a:lex('m-koder')},{l:'Adressbokstäver',a:lex('adresser')},{l:'Formler och begrepp',a:lex('formler')},{sep:1},{l:'Källor',a:lex('kallor')}]},
  {t:'Hjälp',i:[{l:'Guide till G-vis',k:'F1',a:()=>window.gvGuide&&gvGuide()},{l:'Om G-vis …',dot:()=>!!window.gvUpdateAvail,a:()=>window.gvAbout&&gvAbout()},{sep:1},{l:'Varningar i programmet',a:click('warnIndicator')},{sep:1},
    {l:'Tangenter',sub:[{hd:'Kortkommandon'},{l:'Öppna fil',k:'Ctrl+O',dis:true},{l:'Spara',k:'Ctrl+S',dis:true},{l:'Rita G-kod',k:'Ctrl+Enter',dis:true},{l:'Anpassa vy',k:'Dubbelklick',dis:true},{l:'Alla kortkommandon …',a:()=>window.gvGuide&&gvGuide('gg-tangent')}]}]}
-];}
+];(window.gvMenuHooks||[]).forEach(f=>{try{f(L);}catch(e){console.error(e);}});return L;}
 let open=-1,MD=[];
 const chk=x=>x.c===undefined?'':(x.c()?'✓':'');
 function ddHTML(items){return '<div class="rt-dd" role="menu">'+items.map((x,k)=>{
@@ -8029,7 +8029,56 @@ function kEvalDrill(L,els){const E=.05,lines=ta.value.split(/\r?\n/).map((l,i)=>
  return {score:100,ok:true,msgs:[{k:'ok',t:want.length>1?`Alla ${want.length} hålen är borrade på rätt ställe och djup, och cykeln är avslutad med G80.`:`Hålet i ${kfmt(want[0])} är ${nf(-L.z)} mm djupt, och cykeln är avslutad med G80.`}]}}
 
 /* kontrollen: följer banan ritningen, punkt för punkt och medurs? */
-function kEval(){const L=KL();return L.type==='path'?kNeed(L,kEvalBase()):kEvalBase();}
+/* ---------- uppgifter från en lärare (typ 'match'): elevens bana jämförs med lärarens bana ---------- */
+const kE3=(a,b,E)=>Math.abs(a[0]-b[0])<E&&Math.abs(a[1]-b[1])<E&&Math.abs(a[2]-b[2])<E;
+/* skärande rörelser ur banan: raka linjer i samma riktning slås ihop, rörelser ovanför ämnet (top) räknas inte */
+function kSegsFrom(ps,top){const out=[],T=top==null?0:top;
+ (ps||[]).forEach(s=>{if(s.type==='tilt'||s.skipMotion||!s.pts||!s.pts.length||s.type===0)return;const a=s.pts[0],b=s.pts[s.pts.length-1];
+  const A=[a.x,a.y,a.z||0],B=[b.x,b.y,b.z||0];if(A[2]>T+1e-3&&B[2]>T+1e-3)return;
+  const arc=s.type===2||s.type===3;if(!arc&&Math.hypot(B[0]-A[0],B[1]-A[1],B[2]-A[2])<1e-6)return;
+  if(!arc&&Math.hypot(B[0]-A[0],B[1]-A[1])<1e-3){if(B[2]<A[2]-1e-6)out.push({v:true,a:B,b:B,li:(s.line||1)-1});return;}   // borrning eller nedgång: bara hålets läge och botten räknas
+  const p=out[out.length-1];
+  if(p&&!p.v&&!arc&&!p.arc&&kE3(p.b,A,1e-4)){const u=[p.b[0]-p.a[0],p.b[1]-p.a[1],p.b[2]-p.a[2]],w=[B[0]-A[0],B[1]-A[1],B[2]-A[2]];
+   const cr=Math.hypot(u[1]*w[2]-u[2]*w[1],u[2]*w[0]-u[0]*w[2],u[0]*w[1]-u[1]*w[0]),dt=u[0]*w[0]+u[1]*w[1]+u[2]*w[2];
+   if(cr<1e-4*Math.hypot(...u)*Math.hypot(...w)&&dt>0){p.b=B;return;}}
+  if(p&&p.arc&&arc&&p.cw===(s.type===2)&&s.center&&p.c&&Math.abs(p.c[0]-s.center.x)<1e-4&&Math.abs(p.c[1]-s.center.y)<1e-4&&kE3(p.b,A,1e-4)&&Math.abs(p.a[2]-p.b[2])<1e-6&&Math.abs(A[2]-B[2])<1e-6&&!kE3(p.a,p.b,1e-4)){p.b=B;return;}
+  out.push({a:A,b:B,arc,cw:s.type===2,c:s.center?[s.center.x,s.center.y]:null,li:(s.line||1)-1});});
+ /* samma hål flera gånger (till exempel G83 med flera steg) räknas en gång */
+ const v=[];return out.filter(e=>{if(!e.v)return true;const d=v.find(h=>Math.abs(h.a[0]-e.a[0])<1e-3&&Math.abs(h.a[1]-e.a[1])<1e-3);if(d){if(e.a[2]<d.a[2]){d.a=d.b=e.a;}return false;}v.push(e);return true;});}
+const kZ=v=>String(Math.round(v*100)/100).replace('.',',').replace('-','−');
+function kDesc(e){const P=p=>`X${nf(p[0])} Y${nf(p[1])}`;
+ if(e.v)return `i ${P(e.a)} ned till Z${kZ(e.a[2])}`;
+ if(Math.abs(e.a[2]-e.b[2])<1e-3)return `från ${P(e.a)} till ${P(e.b)}`+(Math.abs(e.a[2])>1e-3?` på Z${kZ(e.a[2])}`:'');
+ return `från ${P(e.a)} Z${kZ(e.a[2])} till ${P(e.b)} Z${kZ(e.b[2])}`;}
+const kWhat=e=>e.v?'borrning':e.arc?'båge':'linje';
+function kEvalMatch(L,ps){const E=.05,T=L.segs||[],S=kSegsFrom(ps||paths,L.top),msgs=[];
+ if(!S.length)return {score:0,ok:false,msgs:[{k:'tip',t:'Skriv programmet som ritningen visar. Banan jämförs med lärarens bana.'}]};
+ const same=(t,s)=>{if(t.v||s.v)return t.v&&s.v&&Math.abs(t.a[0]-s.a[0])<E&&Math.abs(t.a[1]-s.a[1])<E&&Math.abs(t.a[2]-s.a[2])<E?1:0;
+  if(!!t.arc!==!!s.arc)return 0;const fw=kE3(t.a,s.a,E)&&kE3(t.b,s.b,E),bw=kE3(t.a,s.b,E)&&kE3(t.b,s.a,E);
+  if(t.arc){if(!(t.c&&s.c&&Math.abs(t.c[0]-s.c[0])<E&&Math.abs(t.c[1]-s.c[1])<E))return 0;if(fw&&t.cw===s.cw)return 1;if(bw&&t.cw!==s.cw)return 2;return 0;}
+  return fw?1:bw?2:0;};
+ const used=S.map(()=>false);let m=0,rev=null,miss=null;
+ T.forEach(t=>{let k=-1,how=0;for(let i=0;i<S.length;i++){if(used[i])continue;const r=same(t,S[i]);if(r){k=i;how=r;if(r===1)break;}}
+  if(k<0){if(!miss)miss=t;return;}used[k]=true;m++;if(how===2&&!rev)rev=S[k];});
+ const extra=S.filter((s,i)=>!used[i]),n=T.length,score=n?Math.round(100*m/(n+extra.length)):0;
+ if(m===n&&!extra.length){msgs.push({k:'ok',t:'Banan följer ritningen.'});if(rev)msgs.push({k:'tip',t:`Rad ${rev.li+1} går åt andra hållet jämfört med lärarens bana.`});return {score:100,ok:true,msgs};}
+ if(m)msgs.push({k:'ok',t:`${m} av ${n} delar stämmer.`});
+ const x=extra[0];if(x&&miss&&x.arc&&miss.arc&&kE3(x.a,miss.a,E)&&kE3(x.b,miss.b,E)){msgs.push({k:'err',t:`Rad ${x.li+1} går till rätt punkt, men bågen ser inte ut som på ritningen. Kontrollera G02 eller G03 och radien eller I och J.`});return {score,ok:false,msgs};}
+ if(x)msgs.push({k:'err',t:`Rad ${x.li+1} skär ${kDesc(x)}, men det finns inte på ritningen.`});
+ if(miss)msgs.push({k:extra.length?'tip':'err',t:`Det saknas en ${kWhat(miss)} ${kDesc(miss)}.`});
+ return {score,ok:false,msgs};}
+/* ritningen för en uppgift: banans linjer och bågar som kedjor av punkter, och hålen för sig */
+function kMatchDraw(L){const ch=[],holes=[];let cur=null;
+ (L.segs||[]).forEach(e=>{if(e.v){holes.push([e.a[0],e.a[1]]);cur=null;return;}
+  const a=[e.a[0],e.a[1]],b=[e.b[0],e.b[1]];if(!cur||Math.hypot(cur[cur.length-1][0]-a[0],cur[cur.length-1][1]-a[1])>1e-3){cur=[a];ch.push(cur);}
+  if(e.arc&&e.c){const r=Math.hypot(a[0]-e.c[0],a[1]-e.c[1]);let t0=Math.atan2(a[1]-e.c[1],a[0]-e.c[0]),t1=Math.atan2(b[1]-e.c[1],b[0]-e.c[0]);
+   if(e.cw){while(t1>=t0-1e-9)t1-=2*Math.PI}else{while(t1<=t0+1e-9)t1+=2*Math.PI}const k=Math.max(8,Math.ceil(Math.abs(t1-t0)/(Math.PI/24)));
+   for(let i=1;i<=k;i++){const t=t0+(t1-t0)*i/k;cur.push([e.c[0]+r*Math.cos(t),e.c[1]+r*Math.sin(t)]);}}
+  else cur.push(b);});
+ return {ch:ch.filter(c=>c.length>1),holes};}
+function kMatchView(L){if(L.view)return L.view;const pts=[[0,0]];(L.segs||[]).forEach(e=>{pts.push(e.a,e.b);if(e.arc&&e.c){const r=Math.hypot(e.a[0]-e.c[0],e.a[1]-e.c[1]);pts.push([e.c[0]-r,e.c[1]-r],[e.c[0]+r,e.c[1]+r]);}});
+ const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);return L.view={x0:Math.min(...xs)-10,x1:Math.max(...xs)+10,y0:Math.min(...ys)-10,y1:Math.max(...ys)+10};}
+function kEval(){const L=KL();if(L.type==='match')return kEvalMatch(L);return L.type==='path'?kNeed(L,kEvalBase()):kEvalBase();}
 function kEvalBase(){const L=KL(),E=.05,eq=(a,b)=>Math.abs(a[0]-b[0])<E&&Math.abs(a[1]-b[1])<E,msgs=[];const els=(R&&R.els)||[];
  if(L.type==='drill')return L.pitch?kEvalTap(L,els):kEvalDrill(L,els);
  if(L.type==='comp')return kEvalComp(L);
@@ -8065,47 +8114,51 @@ KP.c=KP.c||{};const kp=()=>kC===0?KP:(KP.c[KC().id]=KP.c[KC().id]||{done:[],cur:
 const kpSave=()=>{try{localStorage.setItem('rita-kurs',JSON.stringify(KP));}catch(e){}};
 let kWcs=null,kTargets=null,kursOn=false,kSaved=null,kLi=0,kRes=null,kShowHint=false,kOk=false,kTarget=null,kHoles=null;
 const KL=()=>KC().lessons[kLi];
-const kHead=L=>L.start.split('\n').slice(0,2).join('\n')+'\n';
+const kHead=L=>L.type==='match'?'':L.start.split('\n').slice(0,2).join('\n')+'\n';
 const msg=t=>{statusEl.textContent=t;};
 function dlg(html){const D=$('rtDlg');$('rtDlgT').textContent='Kurs';$('rtDlgBody').innerHTML=html;D.hidden=false;}
 /* gränssnittet: stegen överst, lektionskortet i vänsterspalten, mätaren under vyn */
 const kTop=document.createElement('div');kTop.className='k-top';kTop.hidden=true;document.querySelector('.app').before(kTop);
 const kCard=document.createElement('div');kCard.className='k-card';kCard.hidden=true;$('rtExplain').before(kCard);
 const kBar=document.createElement('div');kBar.className='k-bar';kBar.hidden=true;$('rtView').after(kBar);
-function kRenderTop(){const ls=KC().lessons;kTop.innerHTML=`<span class="k-kname">${esc(KC().name)}</span><ol class="k-steps">${ls.map((l,i)=>`<li><button type="button" data-kl="${i}" class="${i===kLi?'cur':''}${kp().done.includes(i)?' done':''}" aria-current="${i===kLi?'step':'false'}"><span class="n">${kp().done.includes(i)&&i!==kLi?'✓':i+1}</span><span class="t">${esc(l.short)}</span></button></li>`).join('')}</ol><button type="button" class="k-exit" id="kExit">Avsluta kursen</button>`;
+function kRenderTop(){const ls=KC().lessons;kTop.innerHTML=`<span class="k-kname">${esc(KC().name)}</span><ol class="k-steps">${ls.map((l,i)=>`<li><button type="button" data-kl="${i}" class="${i===kLi?'cur':''}${kp().done.includes(i)?' done':''}" aria-current="${i===kLi?'step':'false'}"><span class="n">${kp().done.includes(i)&&i!==kLi?'✓':i+1}</span><span class="t">${esc(l.short)}</span></button></li>`).join('')}</ol><button type="button" class="k-exit" id="kExit">${esc(KC().endLabel||'Avsluta kursen')}</button>`;
  kTop.querySelectorAll('[data-kl]').forEach(b=>b.onclick=()=>kLoad(+b.dataset.kl));$('kExit').onclick=()=>kursEnd();}
 let kTries=0,kShown=false;
 function kRenderCard(){const L=KL();let r=kRes||{msgs:[]};
  if(L.blind&&!(kOk&&kShown)){const wl=document.querySelector('#warnList li');r=kShown&&kRes?{msgs:kTries>=2?[{k:'err',t:'Inte rätt än.'}].concat(wl?[{k:'tip',t:wl.textContent.replace(/^Fel:\s*/,'')}]:kRes.msgs.filter(m=>m.k!=='ok').slice(0,1).map(m=>({k:'tip',t:m.t}))):[{k:'err',t:kTries>1?'Inte rätt än. Fortsätt leta.':'Inte rätt än. Läs programmet rad för rad och jämför med ritningen och beskrivningen.'}]}:{msgs:[]};}
  kCard.innerHTML=`<div class="k-h"><span class="k-num">${kLi+1}</span><div><h3>${esc(L.t)}</h3><p>${esc(L.text)}</p></div></div>
   <div class="k-task"><b>Uppgift:</b> ${esc(L.task)}</div>
-  <div class="k-msgs" aria-live="polite">${r.msgs.map(m=>`<p class="k-m ${m.k}">${m.k==='ok'?'<b>Bra!</b> ':m.k==='tip'?'<b>Tips:</b> ':''}${esc(m.t)}</p>`).join('')}${kShowHint?`<p class="k-m hint"><b>Ledtråd:</b> ${esc(L.hint)}</p>`:''}</div>
-  <div class="k-btns"><button type="button" id="kHint">${kShowHint?'Dölj ledtråd':'Visa ledtråd'}</button><button type="button" id="kAns">Visa svar</button></div>`;
- $('kHint').onclick=()=>{kShowHint=!kShowHint;kRenderCard();};
+  <div class="k-msgs" aria-live="polite">${KC().nofb?'<p class="k-m tip">Läraren har valt att du inte ser om svaret är rätt. Skriv programmet och spara svaret när du är klar.</p>':''}${(KC().nofb?[]:r.msgs).map(m=>`<p class="k-m ${m.k}">${m.k==='ok'?'<b>Bra!</b> ':m.k==='tip'?'<b>Tips:</b> ':''}${esc(m.t)}</p>`).join('')}${kShowHint?`<p class="k-m hint"><b>Ledtråd:</b> ${esc(L.hint)}</p>`:''}</div>
+  <div class="k-btns">${L.hint?`<button type="button" id="kHint">${kShowHint?'Dölj ledtråd':'Visa ledtråd'}</button>`:''}${L.answer!=null&&L.answer!==''?'<button type="button" id="kAns">Visa svar</button>':''}${(KC().extra||[]).map((x,i)=>`<button type="button" data-kx="${i}">${esc(x.l)}</button>`).join('')}</div>`;
+ kCard.querySelectorAll('[data-kx]').forEach(b=>b.onclick=()=>KC().extra[+b.dataset.kx].a());
+ if($('kHint'))$('kHint').onclick=()=>{kShowHint=!kShowHint;if(kShowHint)dispatchEvent(new CustomEvent('gv-kurs-hint',{detail:{id:KC().id,li:kLi}}));kRenderCard();};
+ if(!$('kAns'))return;
  $('kAns').onclick=()=>{dlg(`<h3>Svar på lektion ${kLi+1}</h3><p>Så här kan koden se ut. Vill du lägga in den i kodfältet?</p><pre class="k-pre">${esc(kEN(kHead(L)+L.answer,L))}</pre><div class="dl-btns"><button type="button" class="pri" id="kAnsOk">Lägg in svaret</button><button type="button" id="kAnsNo">Nej, jag försöker själv</button></div>`);
-  $('kAnsOk').onclick=()=>{$('rtDlg').hidden=true;loadTextIntoEditor(kEN(kHead(L)+L.answer,L));};$('kAnsNo').onclick=()=>{$('rtDlg').hidden=true;};};}
+  $('kAnsOk').onclick=()=>{$('rtDlg').hidden=true;dispatchEvent(new CustomEvent('gv-kurs-answer',{detail:{id:KC().id,li:kLi}}));loadTextIntoEditor(kEN(kHead(L)+L.answer,L));};$('kAnsNo').onclick=()=>{$('rtDlg').hidden=true;};};}
 function kRenderBar(){const r=(KL().blind&&!kOk)?{score:0}:(kRes||{score:0});const last=kLi>=KC().lessons.length-1;
+ if(KC().nofb){const K=KC();kBar.innerHTML=`<div class="k-meter"><div class="k-ml"><span>Uppgift ${kLi+1} av ${K.lessons.length}</span></div></div><button type="button" id="kRun">Kör banan</button>${kLi>0?'<button type="button" id="kPrev">Föregående</button>':''}<button type="button" class="pri" id="kNext">${last?(K.lastLabel||'Avsluta kursen'):'Nästa uppgift'}</button>`;
+  $('kRun').onclick=()=>{$('stopBtn').click();$('playBtn').click();};if($('kPrev'))$('kPrev').onclick=()=>kLoad(kLi-1);$('kNext').onclick=()=>{if(last){if(K.onLast)K.onLast();else kursEnd();}else kLoad(kLi+1);};return;}
  kBar.innerHTML=`<div class="k-meter"><div class="k-ml"><span>Hur väl banan följer ritningen</span><b>${r.score} %</b></div><div class="k-mt"><div style="width:${r.score}%"></div></div></div>
-  <button type="button" id="kRun">Kör banan</button>${kOk?`<button type="button" class="pri" id="kNext">${last?'Avsluta kursen':'Nästa lektion'}</button>`:`<button type="button" class="pri" id="kCheck">Kontrollera</button>`}`;
+  <button type="button" id="kRun">Kör banan</button>${kOk?`<button type="button" class="pri" id="kNext">${last?(KC().lastLabel||'Avsluta kursen'):KC().custom?'Nästa uppgift':'Nästa lektion'}</button>`:`<button type="button" class="pri" id="kCheck">Kontrollera</button>`}`;
  $('kRun').onclick=()=>{$('stopBtn').click();$('playBtn').click();};
- if($('kCheck'))$('kCheck').onclick=kCheckNow;if($('kNext'))$('kNext').onclick=()=>{if(last)kursEnd();else kLoad(kLi+1);};}
-function kCheckNow(){buildR();kRes=kEval();if(KL().blind){kShown=true;if(!kRes.ok)kTries++;}if(kRes.ok){kOk=true;if(!kp().done.includes(kLi))kp().done.push(kLi);kpSave();kRes.msgs.push({k:'ok',t:kLi>=KC().lessons.length-1?`Du har klarat hela kurs ${kC+1}!`:'Lektionen är klar. Gå vidare när du vill.'});msg('Lektion '+(kLi+1)+' klar.');}
+ if($('kCheck'))$('kCheck').onclick=kCheckNow;if($('kNext'))$('kNext').onclick=()=>{if(last){if(KC().onLast)KC().onLast();else kursEnd();}else kLoad(kLi+1);};}
+function kCheckNow(){buildR();kRes=kEval();if(KL().blind){kShown=true;if(!kRes.ok)kTries++;}dispatchEvent(new CustomEvent('gv-kurs-check',{detail:{id:KC().id,li:kLi,res:kRes}}));if(kRes.ok){kOk=true;if(!kp().done.includes(kLi))kp().done.push(kLi);kpSave();kRes.msgs.push({k:'ok',t:kLi>=KC().lessons.length-1?(KC().doneMsg||`Du har klarat hela kurs ${kC+1}!`):(KC().custom?'Uppgiften är klar. Gå vidare när du vill.':'Lektionen är klar. Gå vidare när du vill.')});msg('Lektion '+(kLi+1)+' klar.');}
  else msg('Inte riktigt än, se tipsen i lektionskortet.');kRenderTop();kRenderCard();kRenderBar();}
 let kT=0;
-function kAfterDraw(){if(!kursOn)return;clearTimeout(kT);kT=setTimeout(()=>{buildR();kRes=kEval();if(kOk&&!kRes.ok)kOk=false;if(KL().blind)kShown=false;kRenderCard();kRenderBar();},150);}
+function kAfterDraw(){if(!kursOn)return;clearTimeout(kT);kT=setTimeout(()=>{buildR();kRes=kEval();if(kOk&&!kRes.ok)kOk=false;if(KL().blind)kShown=false;dispatchEvent(new CustomEvent('gv-kurs-draw',{detail:{id:KC().id,li:kLi,res:kRes}}));kRenderCard();kRenderBar();},150);}
 /* 2D-vyn visar lektionens ritning: banan streckad, startpunkt, krysset och hålen */
-function kView(){const r=$('canvas').getBoundingClientRect(),W=KSTOCK.x1-KSTOCK.x0,H=KSTOCK.y1-KSTOCK.y0;
- view.scale=Math.min(r.width/(W+30),r.height/(H+30));view.offsetX=r.width/2-(KSTOCK.x0+W/2)*view.scale;view.offsetY=r.height/2+(KSTOCK.y0+H/2)*view.scale;}
+function kView(){const r=$('canvas').getBoundingClientRect(),KS=KL().type==='match'?kMatchView(KL()):KSTOCK,W=KS.x1-KS.x0,H=KS.y1-KS.y0;
+ view.scale=Math.min(r.width/(W+30),r.height/(H+30));view.offsetX=r.width/2-(KS.x0+W/2)*view.scale;view.offsetY=r.height/2+(KS.y0+H/2)*view.scale;}
 function kOverlay(){if(!kursOn||stockMode||mode3D)return;const c=ctx;c.save();
  const S=p=>screen({x:p[0],y:p[1]});
  // råämnet
- const a=S([KSTOCK.x0,KSTOCK.y1]),b=S([KSTOCK.x1,KSTOCK.y0]);c.strokeStyle='rgba(200,155,60,.55)';c.lineWidth=1.5;c.setLineDash([]);c.strokeRect(a.x,a.y,b.x-a.x,b.y-a.y);
- (kTargets||[kTarget]).forEach(kTarget=>{
+ if(KL().type!=='match'){const a=S([KSTOCK.x0,KSTOCK.y1]),b=S([KSTOCK.x1,KSTOCK.y0]);c.strokeStyle='rgba(200,155,60,.55)';c.lineWidth=1.5;c.setLineDash([]);c.strokeRect(a.x,a.y,b.x-a.x,b.y-a.y);}
+ (kTargets||[kTarget]).forEach((kTarget,ti)=>{
  if(kTarget&&kTarget.length){c.strokeStyle='rgba(255,214,102,.32)';c.lineWidth=Math.max(8,3*view.scale);c.setLineDash([]);c.lineJoin='round';c.lineCap='round';c.beginPath();
   kTarget.forEach((p,i)=>{const q=S(p);i?c.lineTo(q.x,q.y):c.moveTo(q.x,q.y);});if(kTarget.length>1)c.stroke();c.setLineDash([]);
   const s0=S(kTarget[0]);c.fillStyle='#ffd666';c.beginPath();c.arc(s0.x,s0.y,6,0,Math.PI*2);c.fill();
   if(kTarget.length===1){c.strokeStyle='#ffd666';c.lineWidth=2.5;c.beginPath();c.moveTo(s0.x-14,s0.y);c.lineTo(s0.x+14,s0.y);c.moveTo(s0.x,s0.y-14);c.lineTo(s0.x,s0.y+14);c.stroke();}
-  c.font='600 12px ui-monospace,monospace';c.fillStyle='#ffd666';c.fillText(kfmt(kTarget[0]),s0.x+10,s0.y-10);}
+  if(!(ti>0&&KL().type==='match')){c.font='600 12px ui-monospace,monospace';c.fillStyle='#ffd666';c.fillText(kfmt(kTarget[0]),s0.x+10,s0.y-10);}}
  });
  if(kHoles){c.strokeStyle='#ffd666';c.lineWidth=2;c.setLineDash([5,4]);kHoles.forEach(h=>{const q=S(h),rr=3*view.scale;c.beginPath();c.arc(q.x,q.y,rr,0,Math.PI*2);c.stroke();c.beginPath();c.moveTo(q.x-rr-5,q.y);c.lineTo(q.x+rr+5,q.y);c.moveTo(q.x,q.y-rr-5);c.lineTo(q.x,q.y+rr+5);c.stroke();});c.setLineDash([]);}
  c.restore();}
@@ -8113,24 +8166,28 @@ function kOverlay(){if(!kursOn||stockMode||mode3D)return;const c=ctx;c.save();
 function kEN(s,L){if(!window.cncCodeEN||!window.cncI18n||cncI18n.lang!=='en')return s;let x=cncCodeEN(s);const t=cncI18n.tr(L.t).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[’']/g,'').toUpperCase();return x.replace(/^\(COURSE (\d+) · LESSON (\d+)(?:: [^)]*)?\)/,(m,k,l)=>'(COURSE '+k+' · LESSON '+l+': '+t+')');}
 function kLoad(i){kLi=Math.max(0,Math.min(KC().lessons.length-1,i));kp().cur=kLi;kpSave();kOk=false;kShowHint=false;kRes=null;kTries=0;kShown=false;const L=KL();
  document.documentElement.classList.toggle('k-blind',!!L.blind);
+ const KM=L.type==='match'?kMatchDraw(L):null;
  kTarget=L.type==='g0'?[L.pts[0]]:L.type==='drill'?null:L.paths?null:L.pts?kTargetPts(L):null;
  kTargets=L.paths?L.paths.map((P,q)=>kTargetPts({pts:P,arcs:L.arcs&&L.arcs[q]})):L.rect?[[[L.rect[0],L.rect[1]],[L.rect[0],L.rect[3]],[L.rect[2],L.rect[3]],[L.rect[2],L.rect[1]],[L.rect[0],L.rect[1]]]]:L.circ?[Array.from({length:73},(_,k)=>[L.circ[0]+L.circ[2]*Math.cos(k/72*2*Math.PI),L.circ[1]+L.circ[2]*Math.sin(k/72*2*Math.PI)])]:null;
  // lektioner med egna nollpunkter (G55 …): lägg in dem, och återställ annars
- if(typeof wcsTable!=='undefined'){if(kWcs==null)kWcs=JSON.parse(JSON.stringify(wcsTable));wcsTable.splice(0,wcsTable.length,...JSON.parse(JSON.stringify(kWcs)));if(L.wcs)Object.entries(L.wcs).forEach(([k,v])=>{const w=wcsTable[+k-1];if(w){w.x=v.x||0;w.y=v.y||0;w.z=v.z||0;}});}kHoles=L.type==='drill'?L.holes:null;
- loadTextIntoEditor(kEN(L.start,L));kView();window.render();kRenderTop();kRenderCard();kRenderBar();ta.focus();const n=ta.value.length;ta.setSelectionRange(n,n);kAfterDraw();}
+ if(typeof wcsTable!=='undefined'){if(kWcs==null)kWcs=JSON.parse(JSON.stringify(wcsTable));wcsTable.splice(0,wcsTable.length,...JSON.parse(JSON.stringify(kWcs)));if(L.wcs)Object.entries(L.wcs).forEach(([k,v])=>{const w=wcsTable[+k-1];if(w){w.x=v.x||0;w.y=v.y||0;w.z=v.z||0;}});}kHoles=L.type==='drill'?L.holes:null;if(KM){kTargets=KM.ch;kHoles=KM.holes.length?KM.holes:null;}
+ const cur=typeof L.cur==='function'?L.cur():null;loadTextIntoEditor(cur!=null?(L.setup||'')+cur:kEN(L.start,L));kView();window.render();kRenderTop();kRenderCard();kRenderBar();ta.focus();const n=ta.value.length;ta.setSelectionRange(n,n);kAfterDraw();}
 function kursStart(i,c){kC=c!=null?c:(KP.lastC||0);if(!KURSER[kC])kC=0;KP.lastC=kC;if(i==null)i=kp().cur||0;
- if(!kursOn){kSaved={code:ta.value,dialect:window.RITA_DIALECT,stock:stockMode,m3:mode3D};try{localStorage.setItem('rita-kurs-backup',JSON.stringify(kSaved));}catch(e){}
+ if(!kursOn){kSaved={code:ta.value,dialect:window.RITA_DIALECT,stock:stockMode,m3:mode3D,setup:KC().custom&&window.gvSetupLine?gvSetupLine():''};try{localStorage.setItem('rita-kurs-backup',JSON.stringify(kSaved));}catch(e){}
   kursOn=true;document.documentElement.classList.add('rt-kurs');kTop.hidden=kCard.hidden=kBar.hidden=false;
   if(stockMode)$('cncFrasBtn').click();if(mode3D){const t=$('toggle3D');t.checked=false;t.dispatchEvent(new Event('change',{bubbles:true}));}
-  if(window.RITA_DIALECT!=='fanuc'&&window.ritaSetDialect)window.ritaSetDialect('fanuc',true);dispatchEvent(new Event('resize'));}
+  const dl=KC().dialect||'fanuc';if(window.RITA_DIALECT!==dl&&window.ritaSetDialect)window.ritaSetDialect(dl,true);dispatchEvent(new Event('resize'));}
  kLoad(i);}
 function kursEnd(){if(!kursOn)return;kursOn=false;document.documentElement.classList.remove('k-blind');if(kWcs&&typeof wcsTable!=='undefined'){wcsTable.splice(0,wcsTable.length,...kWcs);kWcs=null;}document.documentElement.classList.remove('rt-kurs');kTop.hidden=kCard.hidden=kBar.hidden=true;kTarget=kHoles=null;
- const s=kSaved;kSaved=null;if(s){if(s.dialect&&window.ritaSetDialect)window.ritaSetDialect(s.dialect,true);loadTextIntoEditor(s.code);if(s.stock&&!stockMode)$('cncFrasBtn').click();}
+ const s=kSaved;kSaved=null;if(s){if(s.dialect&&window.ritaSetDialect)window.ritaSetDialect(s.dialect,true);loadTextIntoEditor((s.setup||'')+s.code);if(s.stock&&!stockMode)$('cncFrasBtn').click();}
  try{localStorage.removeItem('rita-kurs-backup');}catch(e){}dispatchEvent(new Event('resize'));msg('Kursen är avslutad, ditt program är tillbaka.');}
 window.ritaKursMenu=function(){const out=[];KURSER.forEach((K,c)=>{const p=c===0?KP:((KP.c&&KP.c[K.id])||{done:[],cur:0});out.push({l:K.name,sub:K.lessons.map((l,i)=>({l:`${i+1}. ${l.t}${p.done.includes(i)?'  ✓':''}`,a:()=>kursStart(i,c)})).concat([{sep:1},{l:'Fortsätt där jag slutade',a:()=>kursStart(p.cur||0,c)}])});});
  return out.concat([{sep:1},{l:'Fortsätt där jag slutade',a:()=>kursStart(null,null)}],kursOn?[{l:'Avsluta kursen',a:()=>kursEnd()}]:[]);};
 addEventListener('gv-vy-storlek',()=>{if(kursOn&&!stockMode&&!mode3D){kView();window.render();}});
-window.ritaKurs={start:kursStart,end:kursEnd,get on(){return kursOn;},check:kCheckNow};
+/* egna kurser, till exempel uppgifter från en lärare. grade rättar kod utan att röra kodfältet. */
+function kursCustom(K,i){let c=KURSER.findIndex(k=>k.id===K.id);if(c<0){KURSER.push(K);c=KURSER.length-1;}else KURSER[c]=K;if(kursOn&&kC!==c)kursEnd();kursStart(i||0,c);}
+function kGrade(L,code){let ps=[];try{ps=parseGcode(code).paths||[];}catch(e){}return kEvalMatch(L,ps);}
+window.ritaKurs={start:kursStart,end:kursEnd,custom:kursCustom,grade:kGrade,segs:(ps,top)=>kSegsFrom(ps,top),get on(){return kursOn;},get id(){return kursOn?KC().id:null;},get li(){return kLi;},check:kCheckNow};
 const _g=drawGrid;drawGrid=function(){const r=_g.apply(this,arguments);try{kOverlay();}catch(e){}return r;};   // ritningen under programmets bana
 const _d=drawFromText;drawFromText=function(){const r=_d.apply(this,arguments);try{kAfterDraw();}catch(e){}return r;};
 /* sidan stängdes mitt i en kurs: lägg tillbaka det egna programmet */
@@ -8519,7 +8576,7 @@ const LSK='gvis-kod-v1';
 const FS=!!(window.showSaveFilePicker&&window.showOpenFilePicker);   // Chrome och Edge: skriva direkt till filen
 const T_NC=[{description:'G-kod',accept:{'text/plain':['.nc','.tap','.ngc','.txt','.cnc','.gcode','.h','.mpf']}}];
 const T_GVIS=[{description:'G-vis-fil (G-kod, verktyg, ämne och material)',accept:{'text/plain':['.gvis']}}];
-const TYPES=[{description:'G-vis och G-kod',accept:{'text/plain':['.gvis','.nc','.tap','.ngc','.txt','.cnc','.gcode','.h','.mpf']}}];
+const TYPES=[{description:'G-vis och G-kod',accept:{'text/plain':['.gvis','.gvisuppg','.nc','.tap','.ngc','.txt','.cnc','.gcode','.h','.mpf']}}];
 let fileName='program.gvis',handle=null,dirty=false,saveT=0,pendingName=null,quiet=false;
 const kurs=()=>!!(window.ritaKurs&&window.ritaKurs.on);
 /* Två filformat:
@@ -8530,7 +8587,7 @@ const isGvis=n=>/\.gvis$/i.test(n||'');
 const base=n=>(n||'program').replace(/\.[^.]+$/,'')||'program';
 function setupLine(){return '(GKODVIZ:SETUP:'+utf8ToBase64(JSON.stringify({v:1,tools:toolTable,stock:stockSize,mat:(typeof phSettings!=='undefined'?phSettings.mat:null)}))+')\n';}
 function fileText(name){let t=ta.value;if(!isGvis(name===undefined?fileName:name))return t;try{t=setupLine()+t;}catch(e){}return t;}
-window.gvFileText=fileText;
+window.gvFileText=fileText;window.gvSetupLine=setupLine;
 function saveLocal(){if(kurs())return;try{localStorage.setItem(LSK,JSON.stringify({code:ta.value,fileName,t:Date.now()}));}catch(e){}}
 function label(){return (handle?'📄 ':'')+fileName+(dirty?' •':'');}
 function mark(d){dirty=d;const el=document.getElementById('rtFileName');if(el){el.textContent=label();el.title=dirty?'Ändrad sedan den sparades'+(handle?' till filen':''):(handle?'Sparad till filen på datorn':'Sparas automatiskt i webbläsaren');}}
@@ -8539,10 +8596,10 @@ ta.addEventListener('input',()=>{if(!kurs())mark(true);clearTimeout(saveT);saveT
 addEventListener('pagehide',saveLocal);addEventListener('beforeunload',saveLocal);
 /* kod som läggs in (exempel, ritningar, lexikonet, kurser) är ingen fil: Spara frågar då efter ett nytt filnamn */
 const _load=loadTextIntoEditor;
-loadTextIntoEditor=function(text){const r=_load.apply(this,arguments);if(!quiet){if(pendingName){fileName=pendingName;pendingName=null;handle=null;}else{handle=null;fileName='program.gvis';}mark(false);saveLocal();}return r;};
+loadTextIntoEditor=function(text){if(window.gvUppg&&gvUppg.isPack(text)){const n=pendingName;pendingName=null;gvUppg.open(text,n);return;}const r=_load.apply(this,arguments);if(!quiet){if(pendingName){fileName=pendingName;pendingName=null;handle=null;}else{handle=null;fileName='program.gvis';}mark(false);saveLocal();}return r;};
 async function writeHandle(){const w=await handle.createWritable();await w.write(fileText());await w.close();mark(false);saveLocal();statusEl.textContent='Sparat till '+handle.name+'.';}
 function download(){const b=new Blob([fileText()],{type:'text/plain'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=fileName;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);mark(false);saveLocal();statusEl.textContent='Laddade ned '+fileName+'.';}
-async function save(){saveLocal();
+async function save(){if(window.gvUppg&&gvUppg.active())return gvUppg.save();saveLocal();
   if(FS){try{if(!handle)return saveAs(isGvis(fileName)?'gvis':'nc');await writeHandle();return;}
     catch(e){if(e&&e.name==='AbortError')return;handle=null;}}
   download();}
@@ -8553,7 +8610,7 @@ async function saveAs(kind){saveLocal();const name=base(fileName)+(kind==='gvis'
     catch(e){if(e&&e.name==='AbortError')return;handle=null;}}
   fileName=name;download();statusEl.textContent='Laddade ned '+name+(kind==='gvis'?' med verktyg, ämne och material.':' (bara G-koden).');}
 async function open(){
-  if(FS){try{const [h]=await window.showOpenFilePicker({types:TYPES});const f=await h.getFile(),txt=await f.text();pendingName=f.name;loadTextIntoEditor(txt);handle=h;fileName=f.name;mark(false);saveLocal();statusEl.textContent='Öppnade '+f.name+'. Spara (Ctrl+S) skriver tillbaka till filen.';return;}
+  if(FS){try{const [h]=await window.showOpenFilePicker({types:TYPES});const f=await h.getFile(),txt=await f.text();if(window.gvUppg&&gvUppg.isPack(txt)){gvUppg.open(txt,f.name);return;}pendingName=f.name;loadTextIntoEditor(txt);handle=h;fileName=f.name;mark(false);saveLocal();statusEl.textContent='Öppnade '+f.name+'. Spara (Ctrl+S) skriver tillbaka till filen.';return;}
     catch(e){if(e&&e.name==='AbortError')return;}}
   fileInput.click();}
 fileInput.addEventListener('change',()=>{const f=fileInput.files&&fileInput.files[0];if(f)pendingName=f.name;},true);
@@ -8571,6 +8628,7 @@ async function openPending(){const T=window.__TAURI__;if(!T||!T.core)return;let 
   try{f=await T.core.invoke('gvis_take_pending');}catch(e){statusEl.textContent='Det gick inte att öppna filen: '+e;return;}
   if(!f)return;const t=window.cncT||String;
   if(dirty&&ta.value.trim()&&!confirm(t('Koden är ändrad sedan den sparades. Öppna '+f.name+' ändå?')))return;
+  if(window.gvUppg&&gvUppg.isPack(f.text)){gvUppg.open(f.text,f.name);return;}
   try{if(kurs()&&window.ritaKurs.end)window.ritaKurs.end();}catch(e){}
   pendingName=f.name;loadTextIntoEditor(f.text);handle=pathHandle(f);fileName=f.name;mark(false);saveLocal();
   statusEl.textContent='Öppnade '+f.name+'. Spara (Ctrl+S) skriver tillbaka till filen.';}
@@ -8579,6 +8637,58 @@ window.gvOpenPending=openPending;
 try{const s=JSON.parse(localStorage.getItem(LSK)||'null');if(s&&typeof s.code==='string'&&s.code.trim()){quiet=true;_load(s.code);quiet=false;fileName=s.fileName||'program.gvis';}}catch(e){quiet=false;}
 mark(false);
 if(window.__TAURI__&&window.__TAURI__.core)setTimeout(openPending,0);
+})();
+</script>
+<script>
+/* ---------- uppgifter från en lärare: en .gvisuppg-fil öppnas som en kurs, och eleven sparar ett svar (.gvissvar) att lämna in ----------
+   Filerna är vanlig JSON. Svaret innehåller elevens kod för varje uppgift, så läraren rättar om allt själv och resultatet går inte att fuska fram. */
+(function(){
+const $=id=>document.getElementById(id);
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const isPack=t=>typeof t==='string'&&/^\s*\{/.test(t)&&/"format"\s*:\s*"gvis-uppgifter"/.test(t.slice(0,400));
+let P=null,st=null,cid=null;
+const key=()=>'gvis-uppg-'+P.id;
+function persist(){try{localStorage.setItem(key(),JSON.stringify(st));}catch(e){}}
+function msg(t){statusEl.textContent=(window.cncT||String)(t);}
+const safe=t=>String(t||'').replace(/[\\/:*?"<>|]+/g,'').replace(/\s+/g,' ').trim().slice(0,60);
+function setupStr(T){const su=T.setup||P.setup;if(!su)return '';if(typeof su==='string')return su.endsWith('\n')?su:su+'\n';
+  try{return '(GKODVIZ:SETUP:'+utf8ToBase64(JSON.stringify(su))+')\n';}catch(e){return '';}}
+function course(){const S=P.settings||{};
+  return {id:cid,custom:true,name:'Uppgifter · '+P.title,dialect:P.dialect||'fanuc',nofb:S.feedback===false,endLabel:'Avsluta uppgifterna',lastLabel:'Spara svar …',
+    doneMsg:'Alla uppgifter är klara. Spara svaret och lämna in det till läraren.',onLast:save,extra:[{l:'Spara svar …',a:save}],
+    lessons:P.tasks.map((T,i)=>{const su=setupStr(T);return {type:'match',short:T.short||('Uppgift '+(i+1)),t:T.t||('Uppgift '+(i+1)),text:T.text||'',task:T.task||'',
+      hint:S.hint===false?'':(T.hint||''),answer:S.answer===false?null:(T.answer||null),segs:T.segs||[],top:T.top||0,view:T.view||null,setup:su,start:su+(T.start||'G90 G21\n'),cur:()=>st.codes[i]};})};}
+function open(text,name){let p=null;try{p=JSON.parse(text);}catch(e){}
+  if(!p||p.format!=='gvis-uppgifter'||!Array.isArray(p.tasks)||!p.tasks.length){msg('Uppgiftsfilen gick inte att läsa.');return;}
+  if(p.v>1){msg('Uppgiftsfilen är gjord i en nyare G-vis. Uppdatera G-vis och försök igen.');return;}
+  P=p;P.id=String(P.id||'uppg');P.title=String(P.title||name||'Uppgifter');cid='uppg-'+P.id;
+  st={codes:[],used:[],res:[]};try{const o=JSON.parse(localStorage.getItem(key())||'null');if(o&&Array.isArray(o.codes))st=Object.assign(st,o);}catch(e){}
+  window.ritaKurs.custom(course(),0);msg('Öppnade uppgifterna "'+P.title+'".');}
+const mine=d=>P&&d&&d.id===cid;
+addEventListener('gv-kurs-draw',e=>{if(!mine(e.detail))return;st.codes[e.detail.li]=ta.value;if(!(P.settings&&P.settings.feedback===false)&&e.detail.res)st.res[e.detail.li]={score:e.detail.res.score,ok:!!e.detail.res.ok};persist();});
+addEventListener('gv-kurs-hint',e=>{if(!mine(e.detail))return;(st.used[e.detail.li]=st.used[e.detail.li]||{}).hint=true;persist();});
+addEventListener('gv-kurs-answer',e=>{if(!mine(e.detail))return;(st.used[e.detail.li]=st.used[e.detail.li]||{}).answer=true;persist();});
+ta.addEventListener('input',()=>{if(active()){st.codes[window.ritaKurs.li]=ta.value;persist();}});
+function active(){return !!(P&&window.ritaKurs&&window.ritaKurs.id===cid);}
+function answerJSON(name){const ver=(window.cncI18n&&cncI18n.version)||'';
+  return JSON.stringify({format:'gvis-svar',v:1,pack:{id:P.id,title:P.title,teacher:P.teacher||''},name,saved:new Date().toISOString(),app:ver,
+    tasks:P.tasks.map((T,i)=>({i,t:T.t||'',code:st.codes[i]!=null?st.codes[i]:null,hint:!!(st.used[i]&&st.used[i].hint),answer:!!(st.used[i]&&st.used[i].answer),self:st.res[i]||null}))},null,1);}
+async function write(fname,text){
+  if(window.showSaveFilePicker){try{const h=await window.showSaveFilePicker({suggestedName:fname,types:[{description:'Svar på uppgifter i G-vis',accept:{'application/json':['.gvissvar']}}]});
+    const w=await h.createWritable();await w.write(text);await w.close();return h.name;}catch(e){if(e&&e.name==='AbortError')return null;}}
+  const b=new Blob([text],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=fname;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);return fname;}
+function save(){if(!P)return;const D=$('rtDlg');let nm='';try{nm=localStorage.getItem('gvis-elevnamn')||'';}catch(e){}
+  const n=P.tasks.length,done=P.tasks.filter((T,i)=>st.codes[i]!=null&&st.codes[i].trim()).length;
+  $('rtDlgT').textContent='Spara svar';
+  $('rtDlgBody').innerHTML=`<p>Svaret innehåller din kod för varje uppgift. Lämna in filen till läraren, till exempel i Teams eller med e-post.</p>
+   <p>Du har skrivit kod i ${done} av ${n} uppgifter.</p>
+   <p><label>Ditt namn <input type="text" id="gvSvNamn" autocomplete="name" style="width:100%;margin-top:4px" value="${esc(nm)}"></label></p>
+   <div class="dl-btns"><button type="button" class="pri" id="gvSvOk">Spara svaret</button><button type="button" id="gvSvNo">Avbryt</button></div>`;
+  D.hidden=false;const I=$('gvSvNamn');setTimeout(()=>I.focus(),30);
+  const go=async()=>{const name=I.value.trim();if(!name){I.focus();msg('Skriv ditt namn först.');return;}try{localStorage.setItem('gvis-elevnamn',name);}catch(e){}D.hidden=true;
+    const f=await write(safe(name)+' - '+safe(P.title)+'.gvissvar',answerJSON(name));if(f)msg('Svaret är sparat i '+f+'. Lämna in filen till läraren.');};
+  $('gvSvOk').onclick=go;I.onkeydown=e=>{if(e.key==='Enter')go();};$('gvSvNo').onclick=()=>{D.hidden=true;};}
+window.gvUppg={isPack,open,save,active,get pack(){return P;}};
 })();
 </script>
 <script>
@@ -9166,5 +9276,9 @@ $('gvAbCheck').onclick=()=>fill(true);
 /* i programmet: kontrollera i bakgrunden och visa en prick på Hjälp om det finns en ny version */
 if(I&&I.app)setTimeout(async()=>{const v=await I.version(),L=await I.latest(false);if(v&&L&&I.newer(L.version,v)){window.gvUpdateAvail=L.version;const h=[...document.querySelectorAll('.rt-mt')].find(m=>/Hjälp|Help/.test(m.textContent));if(h){h.classList.add('gv-has-upd');h.title='Ny version '+L.version+' finns. Se Hjälp → Om G-vis.';}if(window.statusEl)statusEl.textContent='Ny version '+L.version+' finns. Se Hjälp → Om G-vis.';}},4000);
 })();
+</script>
+<script>
+/* ---------- tillägg: finns bara i programmet från Microsoft Store (pro/pro.js följer inte med på webben eller i det fria programmet) ---------- */
+(function(){if(!(window.__TAURI__&&window.__TAURI__.core))return;const s=document.createElement('script');s.src='pro/pro.js';s.onerror=()=>s.remove();document.body.appendChild(s);})();
 </script>
 </body></html>

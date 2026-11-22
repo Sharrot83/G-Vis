@@ -13,6 +13,10 @@ tauri-plugin-opener = "2"
 tauri-plugin-single-instance = "2"
 serde = { version = "1", features = ["derive"] }
 
+# Microsoft Store: köpta tillägg och köp
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.58", features = ["Services_Store", "Foundation", "Foundation_Collections", "Win32_Foundation", "Win32_UI_Shell"] }
+
 [profile.release]
 strip = true
 lto = true
