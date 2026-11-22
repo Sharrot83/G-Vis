@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>G-vis – tillgänglighet / accessibility</title>
+<meta name="description" content="Tillgänglighetsredogörelse för G-vis och simulatorerna.">
+<style>
+:root{--bg:#f6f7f9;--panel:#fff;--text:#1d2329;--muted:#5c656e;--line:#d9dee3;--accent:#3d6f9e}
+@media (prefers-color-scheme:dark){:root{--bg:#101318;--panel:#171c22;--text:#e6ebf0;--muted:#9aa4ae;--line:#2a323b;--accent:#6ea3d6}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:32px 16px 64px}
+h1{font-size:28px;margin:0 0 4px}h2{font-size:20px;margin:28px 0 8px;border-bottom:1px solid var(--line);padding-bottom:4px}
+p,li{margin:6px 0}.muted{color:var(--muted);font-size:14px}a{color:var(--accent)}
+nav{display:flex;gap:12px;margin:8px 0 20px;font-size:14px}
+section{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px 20px 16px;margin:16px 0}
+</style>
+</head>
+<body>
+<main>
+<h1>G-vis</h1>
+<p class="muted">Tillgänglighet / Accessibility · Senast ändrad / Last updated: 2026-11-22</p>
+<nav><a href="#sv">Svenska</a><a href="#en">English</a><a href="g-vis.html">Till G-vis</a><a href="g-vis-integritet.html">Integritet / Privacy</a></nav>
+
+<section id="sv" lang="sv">
+<h2>Svenska</h2>
+<p>Den här sidan beskriver hur tillgängliga G-vis, lexikonet och simulatorerna för fräs och svarv är. Den bygger på vår egen genomgång, inte på en granskning av en oberoende expert.</p>
+<h2>Det här fungerar</h2>
+<ul>
+<li>Sidorna har språk angivet, och allt finns på svenska och engelska.</li>
+<li>Ljust och mörkt läge, och texten kan förstoras med webbläsarens zoom.</li>
+<li>Kodfältet, menyerna, knapparna och dialogrutorna går att använda med tangentbordet. De vanligaste kommandona har kortkommandon, och Esc stänger fönster. Alla kortkommandon står under Hjälp → Tangenter.</li>
+<li>Förklara rad beskriver varje kodrad i text, och varningarna står i text i inspektören.</li>
+<li>I kurserna och uppgifterna visas återkopplingen i text och läses upp av skärmläsare när den ändras.</li>
+</ul>
+<h2>Kända begränsningar</h2>
+<ul>
+<li>Banan i 2D, 3D-simuleringen och mätverktyget styrs med mus eller pekskärm och går inte att följa med skärmläsare.</li>
+<li>Simulatorerna efterliknar riktiga maskinpaneler med många knappar, en handratt och en 3D-vy. De är inte anpassade för skärmläsare. Svarvsimulatorn går att styra med tangentbordet.</li>
+<li>G-vis och simulatorerna är gjorda för dator och fungerar på surfplatta i liggande läge, men inte på mobil.</li>
+<li>Ljudet från spindel och skärning är ett komplement. Inget viktigt visas bara som ljud.</li>
+</ul>
+<h2>Rapportera brister</h2>
+<p>Stöter du på ett problem med tillgängligheten, öppna ett ärende på <a href="https://github.com/Sharrot83/G-Vis/issues">github.com/Sharrot83/G-Vis/issues</a>. Beskriv gärna vilken sida det gäller och vilket hjälpmedel du använder.</p>
+</section>
+
+<section id="en" lang="en">
+<h2>English</h2>
+<p>This page describes how accessible G-vis, the lexicon and the mill and lathe simulators are. It is based on our own review, not on an audit by an independent expert.</p>
+<h2>What works</h2>
+<ul>
+<li>The pages declare their language, and everything is available in Swedish and English.</li>
+<li>Light and dark mode, and text can be enlarged with the browser's zoom.</li>
+<li>The code editor, menus, buttons and dialogs can be used with the keyboard. The most common commands have shortcuts, and Esc closes windows. All shortcuts are listed under Help → Keys.</li>
+<li>Explain line describes every line of code in text, and the warnings are listed as text in the inspector.</li>
+<li>In the courses and assignments, feedback is shown as text and announced by screen readers when it changes.</li>
+</ul>
+<h2>Known limitations</h2>
+<ul>
+<li>The 2D toolpath, the 3D simulation and the measuring tool are operated with a mouse or touch screen and cannot be followed with a screen reader.</li>
+<li>The simulators imitate real machine panels with many buttons, a handwheel and a 3D view. They are not adapted for screen readers. The lathe simulator can be operated with the keyboard.</li>
+<li>G-vis and the simulators are made for computers and work on tablets in landscape, but not on phones.</li>
+<li>The spindle and cutting sounds are an extra. Nothing important is shown only as sound.</li>
+</ul>
+<h2>Report a problem</h2>
+<p>If you run into an accessibility problem, open an issue at <a href="https://github.com/Sharrot83/G-Vis/issues">github.com/Sharrot83/G-Vis/issues</a>. Please say which page it is and which assistive technology you use.</p>
+</section>
+</main>
+</body>
+</html>

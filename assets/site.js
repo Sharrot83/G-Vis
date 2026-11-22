@@ -188,8 +188,8 @@ function renderFooter(){
   footer.id = "sitefooter";
   footer.style.cssText = "max-width:1100px;margin:40px auto 24px;padding:14px 20px 0;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px;display:flex;gap:16px;flex-wrap:wrap;";
   footer.innerHTML = `
-    <a href="${base}integritet.html" style="color:var(--muted);text-decoration:none;">Integritet &amp; kakor</a>
-    <a href="${base}tillganglighet.html" style="color:var(--muted);text-decoration:none;">Tillgänglighet</a>
+    <a href="${base}courses/cnc-gront-kort/g-vis-integritet.html" style="color:var(--muted);text-decoration:none;">Integritet</a>
+    <a href="${base}courses/cnc-gront-kort/g-vis-tillganglighet.html" style="color:var(--muted);text-decoration:none;">Tillgänglighet</a>
   `;
   document.body.appendChild(footer);
 }
