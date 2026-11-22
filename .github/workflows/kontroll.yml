@@ -1,8 +1,11 @@
-# Kontrollerar att programmets Rust-kod går att bygga i Windows, vid varje pull request.
+# Kontrollerar att programmets Rust-kod går att bygga i Windows, när något pushas till en annan gren än main och vid pull requests.
 # Snabbare än ett helt bygge: bara cargo check, inga installationsfiler.
 name: Kontroll
 
 on:
+  push:
+    branches-ignore: [main]
+    paths: ['app/**', '.github/workflows/kontroll.yml']
   pull_request:
   workflow_dispatch:
 
