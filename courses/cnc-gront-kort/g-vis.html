@@ -6875,6 +6875,7 @@ function menus(){const L=[
    {l:'Tangenter',sub:[{hd:'Kortkommandon'},{l:'Öppna fil',k:'Ctrl+O',dis:true},{l:'Spara',k:'Ctrl+S',dis:true},{l:'Rita G-kod',k:'Ctrl+Enter',dis:true},{l:'Anpassa vy',k:'Dubbelklick',dis:true},{l:'Alla kortkommandon …',a:()=>window.gvGuide&&gvGuide('gg-tangent')}]}]}
 ];(window.gvMenuHooks||[]).forEach(f=>{try{f(L);}catch(e){console.error(e);}});return L;}
 let open=-1,MD=[];
+window.gvMenuRebuild=()=>{MB.querySelectorAll('.rt-mt').forEach(e=>e.remove());open=-1;render();};   // tillägg som lägger till en meny
 const chk=x=>x.c===undefined?'':(x.c()?'✓':'');
 function ddHTML(items){return '<div class="rt-dd" role="menu">'+items.map((x,k)=>{
   if(x.sep)return '<div class="rt-sep" role="separator"></div>';
@@ -8936,6 +8937,7 @@ window.gvMeasure={toggle};
   <li>Ritningen syns som ett ljust band i 2D-vyn. <b>Kontrollera</b> visar hur väl din bana följer den och ger tips om något är fel.</li>
   <li>Ditt eget program läggs undan under kursen och kommer tillbaka när du avslutar den.</li>
   </ul></li>
+<li><b>Uppgifter från läraren</b>: öppna en <code>.gvisuppg</code>-fil med <b>Arkiv → Öppna</b>, eller dubbelklicka på den i programmet. Uppgifterna fungerar som en kurs. När du är klar trycker du <b>Spara svar …</b> och lämnar in <code>.gvissvar</code>-filen till läraren.</li>
 </ul>
 </section>
 
