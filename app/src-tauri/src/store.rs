@@ -4,7 +4,8 @@ use windows::Services::Store::{StoreContext, StorePurchaseStatus};
 use windows::Win32::Foundation::HWND;
 use windows::Win32::UI::Shell::IInitializeWithWindow;
 
-/// Tilläggen som är köpta och aktiva, med sina produkt-id (InAppOfferToken), till exempel "larare".
+/// Tilläggen som är köpta eller prenumererade och aktiva (även under provperioden).
+/// Varje tillägg ger sitt produkt-id (InAppOfferToken), till exempel "larare", och "sku:" + SKU:ns Store-id.
 pub fn owned() -> windows::core::Result<Vec<String>> {
     let ctx = StoreContext::GetDefault()?;
     let lic = ctx.GetAppLicenseAsync()?.get()?;
@@ -13,7 +14,9 @@ pub fn owned() -> windows::core::Result<Vec<String>> {
     while it.HasCurrent()? {
         let l = it.Current()?.Value()?;
         if l.IsActive()? {
+            // produkt-id:t (till exempel "larare") och, för prenumerationer, SKU:ns Store-id
             out.push(l.InAppOfferToken()?.to_string());
+            out.push(format!("sku:{}", l.SkuStoreId()?));
         }
         it.MoveNext()?;
     }
