@@ -50,20 +50,20 @@ G-vis comes with a **tool lexicon** and **simulators** for a vertical mill and t
 ### Learning
 - **13 courses with 78 lessons:**
   1. First moves
-  2. Arcs and circles
-  3. Cutter compensation
-  4. Drilling cycles
-  5. Depth and Z
-  6. A real program
-  7. Cutting data
-  8. Pocketing
-  9. Work offsets and G91
-  10. Tapping
-  11. Subprograms
-  12. Find the error
-  13. Smooth lead-in and lead-out
+  2. Work offsets and G91
+  3. Arcs and circles
+  4. Cutter compensation
+  5. Smooth lead-in and lead-out
+  6. Depth and Z
+  7. Pocketing
+  8. Drilling cycles
+  9. Tapping
+  10. Cutting data
+  11. A real program
+  12. Subprograms
+  13. Find the error
 
-  Every course starts with a short guide for beginners: what you will learn, what you need to know first and the key words. Every lesson checks your program against a drawing and gives hints.
+  Every course starts with a short guide for beginners: what you will learn, what you need to know first and the key words. Every lesson checks your program against a drawing and gives hints that show the method, not the answer.
 - **22 practice drawings** (R-01 to R-22), from a straight slot to a complete part, each with a solution.
 - **Example programs:** facing, pockets, helical entry, hole patterns, profiles with chamfer, engraving, and a physics demo that ends with a broken cutter.
 - **Lexicon:** 35 milling tools, cutting data formulas and calculators, G codes, M codes, address letters, and a step-by-step guide to writing G-code by hand, with a sandbox.
