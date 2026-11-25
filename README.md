@@ -48,7 +48,7 @@ G-vis comes with a **tool lexicon** and **simulators** for a vertical mill and t
 - **Tool changer** with 32 pockets, drag and drop, and a library of end mills, face mills, drills, spot drills, taps, chamfer mills and engraving tools.
 
 ### Learning
-- **12 courses with 72 lessons:**
+- **13 courses with 78 lessons:**
   1. First moves
   2. Arcs and circles
   3. Cutter compensation
@@ -61,9 +61,10 @@ G-vis comes with a **tool lexicon** and **simulators** for a vertical mill and t
   10. Tapping
   11. Subprograms
   12. Find the error
+  13. Smooth lead-in and lead-out
 
-  Every lesson checks your program against a drawing and gives hints.
-- **20 practice drawings** (R-01 to R-20), from a straight slot to a complete part, each with a solution.
+  Every course starts with a short guide for beginners: what you will learn, what you need to know first and the key words. Every lesson checks your program against a drawing and gives hints.
+- **22 practice drawings** (R-01 to R-22), from a straight slot to a complete part, each with a solution.
 - **Example programs:** facing, pockets, helical entry, hole patterns, profiles with chamfer, engraving, and a physics demo that ends with a broken cutter.
 - **Lexicon:** 35 milling tools, cutting data formulas and calculators, G codes, M codes, address letters, and a step-by-step guide to writing G-code by hand, with a sandbox.
 

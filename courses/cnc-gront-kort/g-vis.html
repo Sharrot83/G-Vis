@@ -3179,6 +3179,49 @@ G80 G0 Z25 M9
 M5
 G91 G28 Z0
 M30`},
+  'Tapp Ø40 med mjuk in- och utgång (T2)': {cat:'Program', origin:'G54 i ämnets nedre vänstra hörn, Z0 på överytan', stock:{x0:0,x1:80,y0:0,y1:60,z0:-20,zt:0}, code:`O1013 (TAPP D40 MED MJUK IN- OCH UTGANG)
+(G54: NEDRE VANSTRA HORNET, Z0 = OVERYTAN)
+G21 G17 G40 G49 G80 G90
+T2 M6 (PINNFRAS D10)
+G90 G54 G0 X30 Y75 S3200 M3
+G43 Z5 H2
+M8
+G1 Z-3 F150
+G1 G41 X30 Y60 D2 F500 (RAK INKORNING, G41 SLAS PA)
+G3 X40 Y50 R10 (MJUK INGANG)
+G2 X40 Y50 I0 J-20 (CIRKELN MEDURS)
+G3 X50 Y60 R10 (MJUK UTGANG)
+G1 G40 X50 Y75 (RAK UTKORNING, G40 STANGER AV)
+G0 Z25 M9
+M5
+G91 G28 Z0
+M30`},
+  'Ficka 60 × 40 med mjuk ingång (T2)': {cat:'Program', origin:'G54 i ämnets nedre vänstra hörn, Z0 på överytan', stock:{x0:0,x1:80,y0:0,y1:60,z0:-20,zt:0}, code:`O1014 (FICKA 60X40 R10 MED MJUK INGANG)
+(G54: NEDRE VANSTRA HORNET, Z0 = OVERYTAN)
+(BARA VAGGEN FRASES, MITTEN AR REDAN BORTTAGEN)
+G21 G17 G40 G49 G80 G90
+T2 M6 (PINNFRAS D10)
+G90 G54 G0 X30 Y35 S3200 M3
+G43 Z5 H2
+M8
+G1 Z-3 F150
+G1 G41 X30 Y20 D2 F500 (RAK INKORNING, G41 SLAS PA)
+G3 X40 Y10 R10 (MJUK INGANG TILL VAGGEN)
+G1 X60
+G3 X70 Y20 R10
+G1 Y40
+G3 X60 Y50 R10
+G1 X20
+G3 X10 Y40 R10
+G1 Y20
+G3 X20 Y10 R10
+G1 X40
+G3 X50 Y20 R10 (MJUK UTGANG)
+G1 G40 X50 Y35 (RAK UTKORNING, G40 STANGER AV)
+G0 Z25 M9
+M5
+G91 G28 Z0
+M30`},
   'Kontur 90 × 50 med R5 och fas (T2, T29)': {cat:'Program', origin:'G54 i ämnets nedre vänstra hörn, Z0 på överytan', stock:{x0:0,x1:100,y0:0,y1:60,z0:-20,zt:0}, code:`O1005 (KONTUR 90X50 R5 MED FAS 1 MM)
 (G54: NEDRE VANSTRA HORNET, Z0 = OVERYTAN)
 G21 G17 G40 G49 G80 G90
@@ -6414,6 +6457,75 @@ G80
 G0 Z5
 G91 G28 Z0
 M30`
+  },
+  // ---------- Mjuk in- och utgång ----------
+  {
+    id:'R-21', name:'Rund tapp, mjuk in och ut', lvl:3, topic:'G41 · mjuk in- och utgång',
+    stock:{w:80, d:60, t:20, q:'center-origin'}, origin:'Mitt på detaljen',
+    tool:'T3 Pinnfräs Ø15 (HM)',
+    task:'Fräs tappen Ø40 5 mm ner med <b>T3</b> och <b>G41 D3</b>, medurs runt utsidan. Gå in och ut <b>mjukt</b>: kör in med G41 på en rak rörelse, glid in på cirkeln högst upp med en båge <b>R12</b> och lämna den med en likadan båge. Bågens radie ska vara större än fräsens radie 7,5 mm.',
+    features:[ {k:'boss', h:5, start:[-20,0], segs:[['A',20,0,20,true],['A',-20,0,20,true]]},
+      {k:'cl', a:[-30,0], b:[30,0]}, {k:'cl', a:[0,-30], b:[0,30]} ],
+    dims:[
+      {k:'dx', a:-40, b:40, y:-36, ya:-30, yb:-30},
+      {k:'dy', a:-30, b:30, x:46, xa:40, xb:40},
+      {k:'r', c:[0,0], r:20, ang:-45, len:12, text:'Ø40'}
+    ],
+    facit:`O1021
+(R-21 RUND TAPP, MJUK IN OCH UT)
+G21
+G90 G80 G40 G0
+G91 G28 Z0
+T3 M6
+G90
+G54 X-12 Y47 S4000 M3
+G43 Z5 H3
+G1 Z-5 F200
+G1 G41 X-12 Y32 D3 F600
+G3 X0 Y20 R12
+G2 X0 Y20 I0 J-20
+G3 X12 Y32 R12
+G1 G40 X12 Y47
+G0 Z5
+G91 G28 Z0
+M30`
+  },
+  {
+    id:'R-22', name:'Skylt med fasar, mjuk ut', lvl:3, topic:'G41 · tangentiell in- och utgång',
+    stock:{w:70, d:40, t:20, q:'q1'}, origin:'Ämnets nedre vänstra hörn',
+    tool:'T3 Pinnfräs Ø15 (HM)',
+    task:'Fräs skylten 3 mm ner med <b>T3</b> och <b>G41 D3</b>, medurs. Kör in längs översidans förlängning från vänster, så att fräsen kommer in i konturens riktning. När konturen är runt fortsätter du 10 mm längs översidan och går ut <b>mjukt</b> med en båge <b>R10</b> uppåt, innan G40.',
+    features:[ {k:'boss', h:3, start:[10,32.5], segs:[['L',52.5,32.5],['A',65,20,12.5,true],['A',52.5,7.5,12.5,true],['L',10,7.5],['L',5,12.5],['L',5,27.5],['L',10,32.5]]} ],
+    dims:[
+      {k:'ox', y:-6, items:[[0,0],[5,12.5],[10,7.5],[52.5,7.5],[65,20],[70,0]]},
+      {k:'oy', x:-6, items:[[0,0],[7.5,10],[12.5,5],[27.5,5],[32.5,10],[40,0]]},
+      {k:'r', c:[52.5,20], r:12.5, ang:-40, len:9, text:'2× R12,5'},
+      {k:'note', p:[7.5,30], t:[16,37], text:'2× 5 × 45°'}
+    ],
+    facit:`O1022
+(R-22 SKYLT MED FASAR, MJUK UT)
+G21
+G90 G80 G40 G0
+G91 G28 Z0
+T3 M6
+G90
+G54 X-15 Y32.5 S4000 M3
+G43 Z5 H3
+G1 Z-3 F200
+G1 G41 X10 Y32.5 D3 F600
+G1 X52.5
+G2 X65 Y20 R12.5
+G2 X52.5 Y7.5 R12.5
+G1 X10
+G1 X5 Y12.5
+G1 Y27.5
+G1 X10 Y32.5
+G1 X20
+G3 X30 Y42.5 R10
+G1 G40 Y55
+G0 Z5
+G91 G28 Z0
+M30`
   }
 ];
 
@@ -7536,7 +7648,7 @@ const KURS_F=300;/* matningen sköter kursen själv i kurs 1 */
 const KSTOCK={x0:-10,x1:80,y0:-10,y1:50,z0:-10,top:0};
 const KHEAD=(n,t)=>`(KURS 1 · LEKTION ${n}: ${t})\nG90 G21\n`;/* det lektionen inte handlar om skrivs inte: matning, verktyg och spindel sköter kursen */
 const MEDURS='Runt utsidan av en form kör vi alltid medurs. Det är den riktning fräsen går vid medfräsning, som ger bäst yta. Det lär du dig mer om i kursen om radiekompensering.';
-const KURSER=[{id:'k1',name:'Kurs 1 · Första rörelserna',engrave:true,tools:{1:{type:'vbit',d:6,label:'GRAVERSTIFT 60 GRADER D6'}},lessons:[
+const KURSER=[{id:'k1',name:'Kurs 1 · Första rörelserna',intro:{"om": "Här börjar du om du aldrig har skrivit G-kod. G-kod är maskinens språk: varje rad säger vart verktyget ska gå och hur.", "lar": ["Hur maskinen räknar: X åt höger, Y uppåt och nollpunkten X0 Y0 som alla mått utgår från", "G00: snabb förflyttning till en punkt, utan att skära", "G01: rak rörelse i matning, när verktyget skär", "Att fräsa kvadrater, rektanglar och trianglar med raka linjer"], "fore": "Du behöver inte kunna något. Läs texten i varje lektion och skriv en rad i taget.", "ord": [["Nollpunkt", "Punkten X0 Y0. Alla mått på ritningen räknas därifrån."], ["Koordinat", "X och Y för en punkt, till exempel X20 Y30."], ["Rad", "En instruktion till maskinen. Maskinen läser raderna uppifrån och ned."], ["Matning", "Hur fort verktyget går när det skär, F i mm per minut."]], "tips": "Tänk dig att du styr verktyget med fingret på ritningen. Varje rad flyttar fingret till nästa hörn."},engrave:true,tools:{1:{type:'vbit',d:6,label:'GRAVERSTIFT 60 GRADER D6'}},lessons:[
  {short:'Nollpunkten',t:'Nollpunkten',type:'g0',pts:[[20,30]],
   text:'Nollpunkten, X0 Y0, är där ritningens mått börjar. Med G90 betyder X och Y en punkt på ritningen, räknat från nollpunkten. G00 flyttar verktyget snabbt till punkten utan att skära.',
   task:'Flytta verktyget med G00 till punkten X20 Y30, krysset i rutnätet.',start:KHEAD(1,'NOLLPUNKTEN'),hint:'Skriv en ny rad: G00, sedan X med värdet och Y med värdet.',answer:'G00 X20 Y30'},
@@ -7557,7 +7669,7 @@ const KURSER=[{id:'k1',name:'Kurs 1 · Första rörelserna',engrave:true,tools:{
   task:'Kör medurs runt huset: vänster vägg, taket upp till nocken i X20 Y40, ned på andra sidan, höger vägg och golvet tillbaka till start.',start:KHEAD(6,'HUSET')+'G00 X0 Y0\n',hint:'Punkterna i ordning: X0 Y25, X20 Y40, X40 Y25, X40 Y0 och X0 Y0.',answer:'G00 X0 Y0\nG01 X0 Y25\nG01 X20 Y40\nG01 X40 Y25\nG01 X40 Y0\nG01 X0 Y0'}]}];
 /* ---------- kurs 2 och 3 ---------- */
 const KH=(k,n,t)=>`(KURS ${k} · LEKTION ${n}: ${t})\nG90 G21\n`;
-KURSER.push({id:'k2',name:'Kurs 2 · Bågar och cirklar',engrave:true,tools:{1:{type:'vbit',d:6,label:'GRAVERSTIFT 60 GRADER D6'}},lessons:[
+KURSER.push({id:'k2',name:'Kurs 2 · Bågar och cirklar',intro:{"om": "Raka linjer räcker inte långt. De flesta detaljer har rundade hörn, cirklar och bågar.", "lar": ["G02: båge medurs, G03: båge moturs", "Bågens storlek med radien R", "Bågens centrum med I och J, räknat från startpunkten", "Hela cirklar och rundade hörn"], "fore": "Kurs 1: G00, G01 och hur X och Y fungerar.", "ord": [["Medurs", "Samma håll som visarna på en klocka, sett ovanifrån."], ["Radie", "Avståndet från bågens centrum till bågen."], ["I och J", "Hur långt det är från startpunkten till centrum, i X och i Y."]], "tips": "En båge skrivs med slutpunkten. Startpunkten är där verktyget redan står."},engrave:true,tools:{1:{type:'vbit',d:6,label:'GRAVERSTIFT 60 GRADER D6'}},lessons:[
  {short:'G02 med R',t:'Medurs båge med G02',type:'path',pts:[[0,20],[20,40]],arcs:[{c:[20,20],cw:true}],
   text:'G02 är en båge medurs, åt samma håll som klockans visare. Du skriver bågens slutpunkt med X och Y och radien med R. Bågen börjar där verktyget står.',
   task:'Verktyget står i X0 Y20. Fräs en kvartscirkel medurs med radien 20 upp till X20 Y40.',start:KH(2,1,'G02 MED R')+'G00 X0 Y20\n',hint:'En rad: G02, slutpunkten X20 Y40 och R20.',answer:'G00 X0 Y20\nG02 X20 Y40 R20'},
@@ -7580,7 +7692,7 @@ KURSER.push({id:'k2',name:'Kurs 2 · Bågar och cirklar',engrave:true,tools:{1:{
   text:'En avlång form, som ett spår eller ett hål för en kil, är två raka linjer och två halvcirklar. Med I och J ser du direkt var centrum ligger. '+MEDURS,
   task:'Kör medurs runt formen: från X20 Y30 till X60 Y30, en halvcirkel ned till X60 Y10, en linje till X20 Y10 och en halvcirkel upp till start. Radien är 10.',start:KH(2,6,'AVLANG FORM')+'G00 X20 Y30\n',
   hint:'Första halvcirkeln har centrum 10 mm under sin startpunkt: G02 X60 Y10 I0 J-10.',answer:'G00 X20 Y30\nG01 X60 Y30\nG02 X60 Y10 I0 J-10\nG01 X20 Y10\nG02 X20 Y30 I0 J10'}]});
-KURSER.push({id:'kr',name:'Kurs 3 · Radiekompensering',lessons:[
+KURSER.push({id:'kr',name:'Kurs 3 · Radiekompensering',intro:{"om": "Fräsen har en radie. Med radiekompensering skriver du ritningens mått, och maskinen lägger själv verktyget en radie utanför linjen.", "lar": ["Varför detaljen blir fel utan kompensering", "G41 lägger verktyget till vänster om banan, G42 till höger", "D-registret talar om fräsens radie", "G40 stänger av kompenseringen", "Kompensering runt utsidan och inne i en ficka"], "fore": "Kurs 1 och 2: raka linjer och bågar.", "ord": [["Medfräsning", "Fräsen roterar med matningsriktningen. Ger bäst yta. G41 och medurs runt utsidan."], ["Inkörning", "Den raka rörelse där kompenseringen slås på."]], "tips": "Slå alltid på och av kompenseringen på en rak rörelse som är minst lika lång som fräsens radie."},lessons:[
  {short:'G41',t:'Radiekompensering med G41',type:'comp',comp:'G41',r:5,pts:[[20,10],[20,40],[60,40],[60,10],[20,10]],
   text:'Fräsen har en radie. Kör du verktygets centrum rakt på ritningens linjer blir detaljen för liten, eftersom fräsen tar bort material en radie ut på var sida. Med radiekompensering skriver du ritningens mått, och styrningen flyttar själv ut verktyget en radie. G41 lägger verktyget till vänster om banan, sett i den riktning verktyget går. Runt utsidan medurs hamnar det då på utsidan, och det är medfräsning.',
   task:'Fräs runt kvadraten 40 × 30 med nedre vänstra hörnet i X20 Y10, medurs. Slå på G41 med D2 (pinnfräs Ø10, radie 5 mm) på inkörningen från X10 Y0, och stäng av med G40 när du kör ut till X10 Y0 igen.',
@@ -7646,7 +7758,7 @@ function kEvalComp(L){const els=(R&&R.els)||[],msgs=[],n=ta.value.split(/\r?\n/)
  const ou=kSrc(oi);if(/G0?[23](?![\d.])/.test(ou))return bad(`G40 på rad ${oi+1} står på en båge. Stäng av kompenseringen på en rak rörelse.`,90);
  const lout=els.find(e=>e.li===oi);if(!lout)return bad(`På rad ${oi+1} ska verktyget också köra ut från konturen, till exempel G40 G01 X${lin.p0[0]} Y${lin.p0[1]}.`,90);
  return {score:100,ok:true,msgs:[{k:'ok',t:`${used} med D2 slås på i en rak inkörning, konturen följer ritningens mått och G40 stänger av kompenseringen på utkörningen. Tryck på 3D och Kör banan: fräsen går en radie ${L.inside?'innanför väggarna, inne i fickan':'utanför ritningens linjer'}, så att detaljen blir exakt efter ritningen.`}]}}
-KURSER.push({id:'k3',name:'Kurs 4 · Borrning med cykler',tools:{1:{type:'drill',d:6,label:'SPIRALBORR D6'}},lessons:[
+KURSER.push({id:'k3',name:'Kurs 4 · Borrning med cykler',intro:{"om": "Hål borras med färdiga cykler. En rad räcker för att borra ett hål, och nästa hål behöver bara X och Y.", "lar": ["G81: vanlig borrning till ett djup", "R-planet: höjden där borren börjar mata", "G82 med uppehåll i botten och G83 med urspåning för djupa hål", "G98 och G99: hur högt borren går upp mellan hålen", "Hål i en cirkel"], "fore": "Kurs 1: G00 och hur X och Y fungerar.", "ord": [["Cykel", "En färdig rörelse som maskinen gör av en rad."], ["Urspåning", "Borren går upp och tömmer hålet på spån, och sedan ned igen."]], "tips": "Avsluta alltid borrningen med G80, annars borrar maskinen vid varje ny punkt."},tools:{1:{type:'drill',d:6,label:'SPIRALBORR D6'}},lessons:[
  {short:'G81',t:'Ett hål med G81',type:'drill',cyc:'G81',need:['R'],holes:[[20,20]],z:-5,
   text:'En borrcykel gör hela borrningen på en rad: snabbt ned till R-planet strax ovanför ytan, borrning till djupet Z och snabbt upp igen. G81 är den enklaste cykeln. G80 stänger av cykeln när du är klar.',
   task:'Borra ett hål i X20 Y20, 5 mm djupt. Använd R2 som säkerhetsplan och avsluta med G80.',start:KH(4,1,'G81 ETT HAL')+'G00 X0 Y0 Z10\n',hint:'Skriv G81 X20 Y20 Z-5 R2 F100 på en rad och G80 på nästa.',answer:'G00 X0 Y0 Z10\nG81 X20 Y20 Z-5 R2 F100\nG80'},
@@ -7666,7 +7778,7 @@ KURSER.push({id:'k3',name:'Kurs 4 · Borrning med cykler',tools:{1:{type:'drill'
   text:'En hålcirkel är hål jämnt fördelade på en cirkel. Med fyra hål ligger de rakt till höger, uppåt, till vänster och nedåt från centrum, och koordinaterna räknar du ut med radien.',
   task:'Borra fyra hål, 6 mm djupa, på en hålcirkel med diametern 40 och centrum i X40 Y25.',start:KH(4,6,'HALCIRKEL D40')+'G00 X0 Y0 Z10\n',hint:'Radien är 20. Hålen ligger i X60 Y25, X40 Y45, X20 Y25 och X40 Y5.',answer:'G00 X0 Y0 Z10\nG81 X60 Y25 Z-6 R2 F100\nX40 Y45\nX20 Y25\nX40 Y5\nG80'}]});
 
-KURSER.push({id:'kz',name:'Kurs 5 · Djup och Z',lessons:[
+KURSER.push({id:'kz',name:'Kurs 5 · Djup och Z',intro:{"om": "Hittills har allt hänt i ett plan. Nu kommer djupet: Z.", "lar": ["Z0 är ämnets ovansida, och minus är ned i materialet", "Säkerhetshöjd: hit går verktyget innan det flyttar sig", "Att gå ned i matning, aldrig i snabbtransport", "Flera skärdjup, ramp och helix"], "fore": "Kurs 1. Kurs 2 behövs för helix.", "ord": [["Säkerhetshöjd", "En höjd ovanför ämnet där verktyget kan flytta sig utan att krocka."], ["Ramp", "Verktyget går snett ned medan det rör sig i X eller Y."], ["Helix", "Verktyget går ned i en spiral."]], "tips": "Gå aldrig sidledes med G00 när verktyget är nere i materialet."},lessons:[
  {short:'Ned och upp',t:'Ned i materialet och upp igen',type:'z',paths:[[[10,20],[60,20]]],zs:[-2],
   text:'Hittills har allt varit platt. Nu börjar Z: Z0 är ämnets överyta, och negativt Z är nere i materialet. Verktyget ska alltid gå ned i materialet med G01 och en lugn matning, aldrig med G00. När skäret är klart kör man upp med G00 till en säker höjd över ämnet.',
   task:'Verktyget står i X10 Y20, 5 mm över ytan. Gå ned till Z-2 med G01, fräs ett spår till X60 Y20 och kör upp till Z5 med G00.',start:KH(5,1,'NED OCH UPP')+'G00 X10 Y20 Z5\n',
@@ -7696,7 +7808,7 @@ KURSER.push({id:'kz',name:'Kurs 5 · Djup och Z',lessons:[
 const KP6=(n,t)=>`(KURS 6 · LEKTION ${n}: ${t})\n`;
 const PHEAD='O1000 (KONTUR 40X30)\nG21 G17 G40 G49 G80 G90\n',PTOOL='T2 M06 (PINNFRAS D10)\n',PSP='G54 G00 X10 Y0 S3200 M03\n',PG43='G43 H02 Z25.\n';
 const PCUT='G00 Z5.\nG01 Z-2. F100\nG01 X20 Y10 F300\nG01 X20 Y40\nG01 X60 Y40\nG01 X60 Y10\nG01 X20 Y10\nG00 Z25.\n';
-KURSER.push({id:'kp',name:'Kurs 6 · Ett riktigt program',lessons:[
+KURSER.push({id:'kp',name:'Kurs 6 · Ett riktigt program',intro:{"om": "Ett program för en riktig maskin behöver mer än rörelser: verktyg, varvtal, nollpunkt, längd och kylning.", "lar": ["Programnummer och en säkerhetsrad som sätter maskinen i ett känt läge", "Verktygsbyte med T och M06", "Nollpunkt G54, varvtal S och spindelstart M03", "Längdkompensering med G43 och H", "Kylning M08 och M09, och programslut M30"], "fore": "Kurs 1, 3 och 5.", "ord": [["Längdkompensering", "Maskinen tar hänsyn till hur långt verktyget sticker ut."], ["Spindel", "Den del av maskinen som roterar verktyget."]], "tips": "Skriv programmen i samma ordning varje gång. Då blir de lätta att läsa och svåra att glömma något i."},lessons:[
  {short:'Programhuvud',t:'Programhuvudet',type:'prog',req:['head'],
   text:'Ett riktigt program börjar med ett programnummer, O och fyra siffror, ofta med programmets namn som kommentar. Sedan kommer en säkerhetsrad som sätter maskinen i ett känt läge: millimeter (G21), XY-planet (G17), ingen radiekompensering (G40), ingen längdkompensering (G49), ingen borrcykel (G80) och absoluta mått (G90).',
   task:'Skriv programhuvudet: programnummer O1000 med namnet (KONTUR 40X30), och på nästa rad säkerhetsraden G21 G17 G40 G49 G80 G90.',start:KP6(1,'PROGRAMHUVUD'),
@@ -7791,7 +7903,7 @@ function kEvalProg(L){const n=ta.value.split(/\r?\n/).length,S=i=>kSrc(i),els=((
 
 /* ---------- kurs 7–12 ---------- */
 const KSD=(n,t)=>KH(7,n,t);
-KURSER.push({id:'ks',name:'Kurs 7 · Skärdata',lessons:[
+KURSER.push({id:'ks',name:'Kurs 7 · Skärdata',intro:{"om": "Varvtal och matning avgör om fräsen skär bra, slits ut eller går av.", "lar": ["Skärhastighet Vc och varvtal: S = Vc × 1000 / (π × D)", "Matning: F = S × antal skär × matning per skär", "Skillnaden mellan aluminium och stål", "Maxvarv och skärdata för borrning"], "fore": "Kurs 6: ett riktigt program med S och F.", "ord": [["Vc", "Skärhastighet i meter per minut, hur fort skäret går genom materialet."], ["fz", "Matning per skär i mm, hur tjock spånan blir."]], "tips": "Lexikonet har räknare för varvtal och matning."},lessons:[
  {short:'Varvtal',t:'Varvtalet ur skärhastigheten',type:'sd',chk:[{k:'S',v:9549,tol:.05,f:'S = vc × 1000 / (π × D) = 300 × 1000 / (π × 10) ≈ 9549'}],
   text:'Skärhastigheten vc är hur fort eggen rör sig genom materialet, i meter per minut. Den väljs efter material och verktyg, till exempel cirka 300 m/min för en hårdmetallfräs i aluminium. Varvtalet räknas ut så här: S = vc × 1000 / (π × D), där D är fräsens diameter i mm.',
   task:'Pinnfräsen Ø10 ska fräsa aluminium med vc 300 m/min. Räkna ut varvtalet och skriv S på raden med M03. Avrunda till hela varv.',start:KSD(1,'VARVTAL')+'G00 X10 Y20 Z5 M03\nG01 Z-2 F100\nG01 X60 Y20 F1400\nG00 Z5\n',
@@ -7817,7 +7929,7 @@ KURSER.push({id:'ks',name:'Kurs 7 · Skärdata',lessons:[
   task:'Pinnfräs Ø6 med 3 skär i aluminium: vc 200 m/min och fz 0,04 mm. Skriv S, matningen i spåret och en nedgång i Z med högst halva matningen.',start:KSD(6,'SLUTPROV')+'G00 X10 Y20 Z5 M03\nG01 Z-2\nG01 X60 Y20\nG00 Z5\n',
   hint:'S ≈ 10610 och F ≈ 1273. Nedgången kan till exempel vara F600.',answer:'G00 X10 Y20 Z5 S10610 M03\nG01 Z-2 F600\nG01 X60 Y20 F1273\nG00 Z5'}]});
 const KPK=(n,t)=>KH(8,n,t);
-KURSER.push({id:'kf',name:'Kurs 8 · Fickfräsning',lessons:[
+KURSER.push({id:'kf',name:'Kurs 8 · Fickfräsning',intro:{"om": "En ficka är en fördjupning som måste tömmas helt, inte bara fräsas runt kanten.", "lar": ["Att tömma en ficka fram och tillbaka (zigzag)", "Sidsteg: hur mycket varje drag överlappar", "Grovfräsning och finskär", "Flera djup och runda fickor"], "fore": "Kurs 3 och 5: radiekompensering och djup.", "ord": [["Sidsteg", "Hur långt fräsen flyttar sig åt sidan mellan två drag."], ["Finskär", "Ett sista tunt drag längs väggen som ger rätt mått och fin yta."]], "tips": "Låt fräsen överlappa ungefär en tredjedel av diametern mellan dragen."},lessons:[
  {short:'Zigzag',t:'Töm en ficka i zigzag',type:'pocket',r:5,rect:[20,10,60,40],zs:[-3],edge:2,maxStep:7,
   text:'En ficka töms genom att verktyget går fram och tillbaka i banor bredvid varandra, i zigzag. Verktygets centrum kan aldrig komma närmare väggen än sin radie, så med en fräs Ø10 går banorna 5 mm innanför fickans kanter.',
   task:'Töm fickan 40 × 30 (hörnen X20 Y10 och X60 Y40), 3 mm djup, med fräsen Ø10. Verktyget är redan nere i X25 Y15. Gå i zigzag längs X mellan X25 och X55, med högst 7 mm mellan banorna, upp till Y35.',start:KPK(1,'ZIGZAG')+'G00 X25 Y15 Z5\nG01 Z-3 F100\n',
@@ -7842,7 +7954,7 @@ KURSER.push({id:'kf',name:'Kurs 8 · Fickfräsning',lessons:[
   text:'Nu sätter du ihop allt: rampa ned i fickan i stället för att borra rakt ned, töm den i zigzag och kör ett finskär runt väggarna.',
   task:'Töm fickan 40 × 30, 4 mm djup. Rampa ned från X25 Y15 Z0 till X55 Y15 Z-4, kör tillbaka till X25 på botten, töm resten i zigzag och avsluta med ett finskär runt väggarna.',start:KPK(6,'SLUTPROV')+'G00 X25 Y15 Z5\nG01 Z0 F100\n',
   hint:'G01 X55 Y15 Z-4, G01 X25 Y15, sedan zigzag Y22, Y29, Y35 och finskäret runt X25–X55, Y15–Y35.',answer:'G00 X25 Y15 Z5\nG01 Z0 F100\nG01 X55 Y15 Z-4 F300\nG01 X25 Y15\nG01 Y22\nG01 X55\nG01 Y29\nG01 X25\nG01 Y35\nG01 X55\nG01 X55 Y15\nG01 X25 Y15\nG01 X25 Y35\nG01 X55 Y35\nG00 Z5'}]});
-KURSER.push({id:'kn',name:'Kurs 9 · Nollpunkter och G91',lessons:[
+KURSER.push({id:'kn',name:'Kurs 9 · Nollpunkter och G91',intro:{"om": "Ibland är det enklare att tänka i förflyttningar än i positioner, och ibland ligger flera detaljer i maskinen samtidigt.", "lar": ["G90 absoluta mått och G91 förflyttningar", "Flera nollpunkter, G54 till G59", "Två detaljer i samma program"], "fore": "Kurs 1 och 6.", "ord": [["Absolut", "Varje värde är en position räknat från nollpunkten."], ["Inkrementell", "Varje värde är en förflyttning från där verktyget står."]], "tips": "Slå alltid på G90 igen när du är klar med G91."},lessons:[
  {short:'G91',t:'Inkrementella mått med G91',type:'path',pts:[[20,10],[20,30],[50,30],[50,10],[20,10]],need:[['G91','Använd G91, så att X och Y blir avstånd från där verktyget står.'],['G90#after','Slå på G90 igen när kvadraten är klar, så att nästa program inte börjar i G91.']],
   text:'Med G90 är X och Y en punkt på ritningen. Med G91 är de i stället ett avstånd från där verktyget står just nu: X10 betyder 10 mm åt höger. Det kallas inkrementella mått. Glöm inte att slå tillbaka till G90 efteråt.',
   task:'Verktyget står i X20 Y10. Fräs rektangeln 30 × 20 medurs med G91, och slå på G90 igen efteråt.',start:KH(9,1,'G91')+'G00 X20 Y10\nG91\n',
@@ -7864,7 +7976,7 @@ KURSER.push({id:'kn',name:'Kurs 9 · Nollpunkter och G91',lessons:[
   text:'Allt tillsammans: en annan nollpunkt och inkrementella mått.',
   task:'Fräs en trappa med tre steg på 10 mm i nollpunkten G55. Den börjar i X0 Y10 räknat från G55, går 10 åt höger, 10 upp och så vidare och slutar med 10 åt höger. Använd G91 för stegen.',start:KH(9,5,'SLUTPROV'),
   hint:'G55, G00 X0 Y10, G91, sedan G01 X10, G01 Y10 omväxlande, och sist G90.',answer:'G55\nG00 X0 Y10\nG91\nG01 X10\nG01 Y10\nG01 X10\nG01 Y10\nG01 X10\nG90'}]});
-KURSER.push({id:'kg',name:'Kurs 10 · Gängning',lessons:[
+KURSER.push({id:'kg',name:'Kurs 10 · Gängning',intro:{"om": "Invändiga gängor görs med en gängtapp som måste följa gängans stigning exakt.", "lar": ["Gängborr och stigning", "Gängcykeln G84", "Matning: F = S × stigningen", "M29 för synkroniserad gängning"], "fore": "Kurs 4 och 7: borrcykler och skärdata.", "ord": [["Stigning", "Hur långt gängan går per varv. M6 har 1 mm."], ["Gängborr", "Borret före gängning. För M6 är det Ø5."]], "tips": "Räkna alltid ut F från varvtalet och stigningen. Fel matning bryter gängtappen."},lessons:[
  {short:'Gängborr',t:'Borra för gängan',type:'drill',cyc:'G81',need:['R'],holes:[[30,25]],z:-15,
   text:'Innan man gängar borrar man ett hål med gängborrdiametern, som är gängans diameter minus stigningen. För M8 med stigningen 1,25 mm blir det 8 − 1,25 = 6,75, och man använder borren Ø6,8. Hålet borras lite djupare än gängan, så att tappen inte slår i botten.',
   task:'Borra hålet för en M8-gänga i X30 Y25, 15 mm djupt, med G81 och R-planet 2 mm över ytan.',start:KH(10,1,'GANGBORR')+'G00 X0 Y0 Z10\n',hint:'G81 X30 Y25 Z-15 R2 F100 och sedan G80.',answer:'G00 X0 Y0 Z10\nG81 X30 Y25 Z-15 R2 F100\nG80'},
@@ -7877,7 +7989,7 @@ KURSER.push({id:'kg',name:'Kurs 10 · Gängning',lessons:[
  {short:'Flera gängor',t:'Slutprov: tre gängor M6',type:'drill',cyc:'G84',need:['R'],holes:[[20,25],[40,25],[60,25]],z:-10,pitch:1,
   text:'M6 har stigningen 1 mm, så matningen blir lika stor som varvtalet. Som i en borrcykel räcker det med X och Y på raderna efter G84.',
   task:'Gänga M6 i X20 Y25, X40 Y25 och X60 Y25, 10 mm djupt, med S500. R-planet 5 mm över ytan.',start:KH(10,4,'TRE GANGOR')+'G00 X0 Y0 Z10 S500 M03\n',hint:'G84 X20 Y25 Z-10 R5 F500, sedan X40 Y25, X60 Y25 och G80.',answer:'G00 X0 Y0 Z10 S500 M03\nG84 X20 Y25 Z-10 R5 F500\nX40 Y25\nX60 Y25\nG80'}]});
-KURSER.push({id:'ku',name:'Kurs 11 · Underprogram',lessons:[
+KURSER.push({id:'ku',name:'Kurs 11 · Underprogram',intro:{"om": "När samma sak ska göras flera gånger skriver du den en gång i ett underprogram och anropar det.", "lar": ["Anropa ett underprogram med M98 P", "Avsluta underprogrammet med M99", "Upprepa med L", "Djup i steg med G91", "M97 i Hass"], "fore": "Kurs 5 och 9: djup och G91.", "ord": [["Underprogram", "Ett eget litet program som huvudprogrammet kan köra flera gånger."]], "tips": "Skriv underprogrammet med G91 om det ska kunna köras på flera ställen."},lessons:[
  {short:'Anropa',t:'Anropa ett underprogram med M98',type:'z',paths:[[[10,20],[60,20]]],zs:[-2],need:[['M98\\s*P\\s*2000|M98.*P2000','Anropa underprogrammet med M98 P2000.']],
   text:'Ett underprogram är en bit kod som kan köras flera gånger. Det har ett eget O-nummer, skrivs efter M30 och slutar med M99, som hoppar tillbaka. Huvudprogrammet kör det med M98 P och underprogrammets nummer.',
   task:'Underprogrammet O2000 fräser ett spår. Anropa det i huvudprogrammet på raden före M30.',start:KH(11,1,'ANROPA')+'G00 X10 Y20 Z5\n\nM30\nO2000 (ETT SPAR)\nG01 Z-2 F100\nG01 X60 Y20 F300\nG00 Z5\nM99\n',
@@ -7906,7 +8018,7 @@ KURSER.push({id:'ku',name:'Kurs 11 · Underprogram',lessons:[
 
 const KF=n=>KH(12,n,'OVNING '+n),KFp=n=>`(KURS 12 · LEKTION ${n}: OVNING ${n})\n`;
 const FT='Hitta felet och rätta det. Tryck på Kontrollera när du tror att programmet är rätt.',FT2='Programmet har två fel. Hitta och rätta båda.',FT3='Programmet har tre fel. Hitta och rätta alla.';
-KURSER.push({id:'kh',name:'Kurs 12 · Hitta felet',lessons:[
+KURSER.push({id:'kh',name:'Kurs 12 · Hitta felet',intro:{"om": "Här är programmen redan skrivna, men det finns ett fel i varje. Hitta det och rätta det.", "lar": ["Att läsa ett program rad för rad", "De vanligaste felen i G-kod", "Att jämföra programmet med ritningen"], "fore": "Kurs 1 till 6.", "tips": "Fråga dig vid varje rad: var står verktyget nu, och vart ska det? Banan i mitten visar ofta var felet är."},lessons:[
  {short:'1',t:'Övning 1',blind:true,type:'path',pts:[[20,10],[20,40],[60,40],[60,10],[20,10]],
   text:'Programmet ska fräsa kvadraten på ritningen, men banan blir inte som ritningen.',task:FT,start:KF(1)+'G00 X20 Y10\nG01 X20 Y40\nG01 X6 Y40\nG01 X60 Y10\nG01 X20 Y10\n',
   hint:'Jämför koordinaterna rad för rad med ritningens hörn.',answer:'G00 X20 Y10\nG01 X20 Y40\nG01 X60 Y40\nG01 X60 Y10\nG01 X20 Y10'},
@@ -7954,6 +8066,57 @@ KURSER.push({id:'kh',name:'Kurs 12 · Hitta felet',lessons:[
   start:KFp(12)+'O1000 (KONTUR 40X30)\nG21 G17 G40 G49 G80 G90\nT2 M06 (PINNFRAS D10)\nG54 G00 X10 Y0 M03\nG43 H02 Z25.\nG00 Z5.\nG01 Z-2. F100\nM08\nG01 X20 Y10 F300\nG01 X20 Y40\nG01 X60 Y40\nG01 X60 Y10\nG01 X20 Y10\nG00 Z25.\nM09\nM05\nG91 G28 Z0\n',
   hint:'Hur fort går spindeln? När slås kylvätskan på? Och hur slutar programmet?',
   answer:'O1000 (KONTUR 40X30)\nG21 G17 G40 G49 G80 G90\nT2 M06 (PINNFRAS D10)\nG54 G00 X10 Y0 S3200 M03\nG43 H02 Z25.\nM08\nG00 Z5.\nG01 Z-2. F100\nG01 X20 Y10 F300\nG01 X20 Y40\nG01 X60 Y40\nG01 X60 Y10\nG01 X20 Y10\nG00 Z25.\nM09\nM05\nG91 G28 Z0\nM30'}]});
+
+const KMS=[{re:/G41/,t:'Slå på radiekompenseringen med G41 och D2 på den raka inkörningen före bågen.'},{re:/G41[^\n]*D\s*2|D\s*2[^\n]*G41/,t:'Skriv D2 på samma rad som G41, så att styrningen vet fräsens radie.'},{re:/G40/,t:'Stäng av kompenseringen med G40 på den raka utkörningen efter bågen.'}];
+KURSER.push({id:'km',name:'Kurs 13 · Mjuk in- och utgång',
+ intro:{om:'Kör fräsen rakt in mot en kontur stannar den ett ögonblick mot väggen och lämnar ett märke. Med en mjuk ingång glider fräsen in på konturen i en båge, och med en mjuk utgång glider den ut på samma sätt. Ytan blir jämn hela vägen runt.',
+  lar:['Varför en rak inkörning lämnar märke på detaljen','Mjuk ingång: en båge som går in i konturen utan knyck (tangentiellt)','Mjuk utgång: en båge som tar fräsen bort från konturen','Reglerna: G41 på en rak rörelse före bågen, G40 på en rak rörelse efter, och bågens radie större än fräsens','Mjuk in- och utgång både runt en tapp och inne i en ficka'],
+  fore:'Du ska kunna G02 och G03 (kurs 2) och radiekompensering med G41 och G40 (kurs 3). Alla lektioner använder D2, pinnfräs Ø10 med radien 5 mm.',
+  ord:[['Tangentiell','Bågen och konturen har samma riktning där de möts, så banan får ingen knyck.'],['Inkörning','Den raka rörelsen där G41 slås på, innan den mjuka bågen.'],['Utkörning','Den raka rörelsen där G40 stänger av kompenseringen, efter den mjuka bågen.']],
+  tips:'Rita banan på ett papper först. Var ska fräsen gå in, och åt vilket håll går den när den når konturen? Bågen in ska ha samma riktning som konturen där de möts.'},
+ lessons:[
+ {short:'Mjuk ingång',t:'Mjuk ingång till en tapp',type:'match',must:KMS,
+  solution:'G00 X30 Y75\nG41 G01 X30 Y60 D2\nG03 X40 Y50 R10\nG02 X40 Y50 I0 J-20\nG40 G01 X40 Y65',
+  text:'Tappen är en cirkel med diametern 40 och centrum i X40 Y30. Fräsen ska gå runt utsidan medurs med G41. I stället för att köra rakt in mot cirkeln glider fräsen in i en båge med radien 10, som möter cirkeln högst upp, i X40 Y50. Där har bågen och cirkeln samma riktning, åt höger, så fräsen stannar aldrig mot väggen.',
+  task:'Inkörningen med G41 är redan skriven. Skriv den mjuka ingången G03 X40 Y50 R10, sedan hela cirkeln medurs med G02 X40 Y50 I0 J-20, och kör ut rakt uppåt med G40 G01 X40 Y65.',
+  start:KH(13,1,'MJUK INGANG')+'G00 X30 Y75\nG41 G01 X30 Y60 D2\n',
+  hint:'Ingången går moturs, G03, från X30 Y60 till toppen av cirkeln i X40 Y50. Cirkeln börjar och slutar i samma punkt. Centrum ligger 20 mm under startpunkten, därför J-20.',
+  answer:'G00 X30 Y75\nG41 G01 X30 Y60 D2\nG03 X40 Y50 R10\nG02 X40 Y50 I0 J-20\nG40 G01 X40 Y65'},
+ {short:'Mjuk utgång',t:'Mjuk utgång från tappen',type:'match',must:KMS,
+  solution:'G00 X30 Y75\nG41 G01 X30 Y60 D2\nG03 X40 Y50 R10\nG02 X40 Y50 I0 J-20\nG03 X50 Y60 R10\nG40 G01 X50 Y75',
+  text:'När cirkeln är klar ska fräsen lämna konturen lika mjukt som den kom in. Utgången är en båge med radien 10 som börjar högst upp på cirkeln och fortsätter åt höger och uppåt, bort från tappen. Först när fräsen har lämnat konturen stänger du av kompenseringen med G40 på en rak rörelse.',
+  task:'Ingången och cirkeln är redan skrivna. Lägg till den mjuka utgången G03 X50 Y60 R10 och kör sedan rakt upp med G40 G01 X50 Y75.',
+  start:KH(13,2,'MJUK UTGANG')+'G00 X30 Y75\nG41 G01 X30 Y60 D2\nG03 X40 Y50 R10\nG02 X40 Y50 I0 J-20\n',
+  hint:'Utgången är en spegelbild av ingången: moturs, G03, från X40 Y50 till X50 Y60 med R10. Sedan G40 G01 X50 Y75.',
+  answer:'G00 X30 Y75\nG41 G01 X30 Y60 D2\nG03 X40 Y50 R10\nG02 X40 Y50 I0 J-20\nG03 X50 Y60 R10\nG40 G01 X50 Y75'},
+ {short:'Hela tappen',t:'In och ut på egen hand',type:'match',must:KMS,
+  solution:'G00 X38 Y92\nG41 G01 X38 Y77 D2\nG03 X50 Y65 R12\nG02 X50 Y65 I0 J-25\nG03 X62 Y77 R12\nG40 G01 X62 Y92',
+  text:'Nu skriver du allt själv. Tappen har diametern 50 och centrum i X50 Y40, så toppen ligger i X50 Y65. Den mjuka in- och utgången har radien 12. Bågens radie ska alltid vara större än fräsens radie, annars kan styrningen inte lägga verktyget innanför bågen.',
+  task:'Gå med G00 till X38 Y92. Kör in med G41 G01 X38 Y77 D2, gå in mjukt med en båge R12 till toppen, fräs hela cirkeln medurs, gå ut mjukt med en båge R12 till X62 Y77 och kör ut med G40 G01 X62 Y92.',
+  start:KH(13,3,'HELA TAPPEN'),
+  hint:'G03 X50 Y65 R12 in, G02 X50 Y65 I0 J-25 runt, G03 X62 Y77 R12 ut.',
+  answer:'G00 X38 Y92\nG41 G01 X38 Y77 D2\nG03 X50 Y65 R12\nG02 X50 Y65 I0 J-25\nG03 X62 Y77 R12\nG40 G01 X62 Y92'},
+ {short:'Kontur',t:'Kontur med fasar och mjuk utgång',type:'match',must:KMS,
+  solution:'G00 X-20 Y0\nG41 G01 X4 Y0 D2\nG01 X40 Y0\nG02 X50 Y-10 R10\nG02 X40 Y-20 R10\nG01 X4 Y-20\nG01 X0 Y-16\nG01 X0 Y-4\nG01 X4 Y0\nG01 X12 Y0\nG03 X20 Y8 R8\nG40 G01 X20 Y20',
+  text:'Detaljen är 50 × 20 med översidan på Y0 och vänsterkanten på X0. Vänstra hörnen har fasen 4 × 45° och högra änden är rund, R10. På en rak kant går det bra att köra in längs kanten: fräsen kommer in rakt i konturens riktning, och det är också mjukt. När konturen är runt kör fräsen 8 mm till längs översidan, så att ytan överlappar, och lämnar sedan med en båge R8.',
+  task:'Börja i X-20 Y0. Kör in med G41 G01 X4 Y0 D2 och fräs konturen medurs: översidan till X40, två bågar R10 runt högra änden, undersidan, fasen, vänstersidan och fasen tillbaka till X4 Y0. Fortsätt till X12 Y0, gå ut med G03 X20 Y8 R8 och stäng av med G40 G01 X20 Y20.',
+  start:KH(13,4,'KONTUR MED FASAR'),
+  hint:'Högra änden: G02 X50 Y-10 R10 och G02 X40 Y-20 R10. Fasen nere till vänster går från X4 Y-20 till X0 Y-16, och fasen uppe till vänster från X0 Y-4 till X4 Y0.',
+  answer:'G00 X-20 Y0\nG41 G01 X4 Y0 D2\nG01 X40 Y0\nG02 X50 Y-10 R10\nG02 X40 Y-20 R10\nG01 X4 Y-20\nG01 X0 Y-16\nG01 X0 Y-4\nG01 X4 Y0\nG01 X12 Y0\nG03 X20 Y8 R8\nG40 G01 X20 Y20'},
+ {short:'Ficka',t:'Mjuk ingång i en ficka',type:'match',must:KMS,
+  solution:'G00 X20 Y25\nG41 G01 X20 Y10 D2\nG03 X30 Y0 R10\nG01 X50 Y0\nG03 X60 Y10 R10\nG01 X60 Y30\nG03 X50 Y40 R10\nG01 X10 Y40\nG03 X0 Y30 R10\nG01 X0 Y10\nG03 X10 Y0 R10\nG01 X30 Y0\nG03 X40 Y10 R10\nG40 G01 X40 Y25',
+  text:'Inne i en ficka går fräsen moturs med G41, och då ligger den på insidan av väggen. Fickan är 60 × 40 med R10 i hörnen och nedre vänstra hörnet i X0 Y0. Fräsen börjar inne i fickan, kör in med G41 och glider ut till väggen i en båge R10 som möter undersidan i X30 Y0. Hörnradien R10 måste också vara större än fräsens radie 5, annars får fräsen inte plats.',
+  task:'Börja i X20 Y25. Kör in med G41 G01 X20 Y10 D2 och gå mjukt ut till väggen med G03 X30 Y0 R10. Fräs fickan moturs runt med G03 R10 i hörnen tillbaka till X30 Y0, gå ut mjukt med G03 X40 Y10 R10 och stäng av med G40 G01 X40 Y25.',
+  start:KH(13,5,'FICKA MED MJUK INGANG'),
+  hint:'Moturs runt fickan: X50 Y0, G03 X60 Y10 R10, X60 Y30, G03 X50 Y40 R10, X10 Y40, G03 X0 Y30 R10, X0 Y10, G03 X10 Y0 R10 och X30 Y0.',
+  answer:'G00 X20 Y25\nG41 G01 X20 Y10 D2\nG03 X30 Y0 R10\nG01 X50 Y0\nG03 X60 Y10 R10\nG01 X60 Y30\nG03 X50 Y40 R10\nG01 X10 Y40\nG03 X0 Y30 R10\nG01 X0 Y10\nG03 X10 Y0 R10\nG01 X30 Y0\nG03 X40 Y10 R10\nG40 G01 X40 Y25'},
+ {short:'Slutprov',t:'Slutprov: platta med rundade hörn',type:'match',must:KMS,
+  solution:'G00 X-15 Y15\nG41 G01 X0 Y15 D2\nG03 X10 Y25 R10\nG01 X10 Y35\nG02 X15 Y40 R5\nG01 X55 Y40\nG02 X60 Y35 R5\nG01 X60 Y15\nG02 X55 Y10 R5\nG01 X15 Y10\nG02 X10 Y15 R5\nG01 X10 Y25\nG03 X0 Y35 R10\nG40 G01 X-15 Y35',
+  text:'Plattan är 50 × 30 med R5 i hörnen och nedre vänstra hörnet i X10 Y10. Fräsen ska gå in mjukt mitt på vänstersidan, i X10 Y25, gå runt utsidan medurs och gå ut mjukt där den kom in. Den mjuka in- och utgången har radien 10.',
+  task:'Börja i X-15 Y15 och kör in med G41 G01 X0 Y15 D2. Gå in med en båge R10 till X10 Y25, fräs runt plattan medurs tillbaka till X10 Y25, gå ut med en båge R10 till X0 Y35 och kör ut med G40 G01 X-15 Y35.',
+  start:KH(13,6,'SLUTPROV'),
+  hint:'Ingången och utgången går moturs, G03, eftersom bågarna ligger utanför plattan. Hörnen går medurs, G02 R5. Glöm inte sista biten upp till X10 Y25 innan du går ut.',
+  answer:'G00 X-15 Y15\nG41 G01 X0 Y15 D2\nG03 X10 Y25 R10\nG01 X10 Y35\nG02 X15 Y40 R5\nG01 X55 Y40\nG02 X60 Y35 R5\nG01 X60 Y15\nG02 X55 Y10 R5\nG01 X15 Y10\nG02 X10 Y15 R5\nG01 X10 Y25\nG03 X0 Y35 R10\nG40 G01 X-15 Y35'}]});
 
 /* kontroll av skärdata: S före första skäret, F i skäret, nedgångens matning */
 function kEvalSd(L){const n=ta.value.split(/\r?\n/).length,els=((R&&R.els)||[]).filter(e=>e.xy),nfx=v=>String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g,' ');
@@ -8069,6 +8232,8 @@ function kDesc(e){const P=p=>`X${nf(p[0])} Y${nf(p[1])}`;
  if(Math.abs(e.a[2]-e.b[2])<1e-3)return `från ${P(e.a)} till ${P(e.b)}`+(Math.abs(e.a[2])>1e-3?` på Z${kZ(e.a[2])}`:'');
  return `från ${P(e.a)} Z${kZ(e.a[2])} till ${P(e.b)} Z${kZ(e.b[2])}`;}
 const kWhat=e=>e.v?'borrning':e.arc?'båge':'linje';
+function kMust(L){if(!L.must)return null;const n=ta.value.split(/\r?\n/).length,src=Array.from({length:n},(_,i)=>kSrc(i)).join('\n');
+ const f=L.must.find(m=>!m.re.test(src));return f?f.t:null;}
 function kEvalMatch(L,ps){const E=.05,T=L.segs||[],S=kSegsFrom(ps||paths,L.top),msgs=[];
  if(!S.length)return {score:0,ok:false,msgs:[{k:'tip',t:'Skriv programmet som ritningen visar. Banan jämförs med lärarens bana.'}]};
  const same=(t,s)=>{if(t.v||s.v)return t.v&&s.v&&Math.abs(t.a[0]-s.a[0])<E&&Math.abs(t.a[1]-s.a[1])<E&&Math.abs(t.a[2]-s.a[2])<E?1:0;
@@ -8079,6 +8244,7 @@ function kEvalMatch(L,ps){const E=.05,T=L.segs||[],S=kSegsFrom(ps||paths,L.top),
  T.forEach(t=>{let k=-1,how=0;for(let i=0;i<S.length;i++){if(used[i])continue;const r=same(t,S[i]);if(r){k=i;how=r;if(r===1)break;}}
   if(k<0){if(!miss)miss=t;return;}used[k]=true;m++;if(how===2&&!rev)rev=S[k];});
  const extra=S.filter((s,i)=>!used[i]),n=T.length,score=n?Math.round(100*m/(n+extra.length)):0;
+ const mu=ps?null:kMust(L);if(m===n&&!extra.length&&mu)return {score:90,ok:false,msgs:[{k:'ok',t:'Banan följer ritningen.'},{k:'err',t:mu}]};
  if(m===n&&!extra.length){msgs.push({k:'ok',t:'Banan följer ritningen.'});if(rev)msgs.push({k:'tip',t:`Rad ${rev.li+1} går åt andra hållet jämfört med lärarens bana.`});return {score:100,ok:true,msgs};}
  if(m)msgs.push({k:'ok',t:`${m} av ${n} delar stämmer.`});
  const x=extra[0];if(x&&miss&&x.arc&&miss.arc&&kE3(x.a,miss.a,E)&&kE3(x.b,miss.b,E)){msgs.push({k:'err',t:`Rad ${x.li+1} går till rätt punkt, men bågen ser inte ut som på ritningen. Kontrollera G02 eller G03 och radien eller I och J.`});return {score,ok:false,msgs};}
@@ -8139,7 +8305,15 @@ function dlg(html){const D=$('rtDlg');$('rtDlgT').textContent='Kurs';$('rtDlgBod
 const kTop=document.createElement('div');kTop.className='k-top';kTop.hidden=true;document.querySelector('.app').before(kTop);
 const kCard=document.createElement('div');kCard.className='k-card';kCard.hidden=true;$('rtExplain').before(kCard);
 const kBar=document.createElement('div');kBar.className='k-bar';kBar.hidden=true;$('rtView').after(kBar);
-function kRenderTop(){const ls=KC().lessons;kTop.innerHTML=`<span class="k-kname">${esc(KC().name)}</span><ol class="k-steps">${ls.map((l,i)=>`<li><button type="button" data-kl="${i}" class="${i===kLi?'cur':''}${kp().done.includes(i)?' done':''}" aria-current="${i===kLi?'step':'false'}"><span class="n">${kp().done.includes(i)&&i!==kLi?'✓':i+1}</span><span class="t">${esc(l.short)}</span></button></li>`).join('')}</ol><button type="button" class="k-exit" id="kExit">${esc(KC().endLabel||'Avsluta kursen')}</button>`;
+/* Om kursen: vad man lär sig, vad man behöver kunna och hur en lektion går till. Visas första gången och med knappen Om kursen. */
+const KINTRO_HUR='Till vänster skriver du koden, en rörelse per rad. I mitten visas ritningen, och banan ritas medan du skriver. Uppgiften står i rutan under ritningen. Tryck Kontrollera när du är klar, så får du veta vad som stämmer och vad som saknas. Fastnar du kan du trycka Visa ledtråd, och sist Visa svar. Kör banan visar hur verktyget rör sig.';
+function kIntro(first){const K=KC(),I=K.intro;if(!I)return;
+ dlg(`<h3>${esc(K.name)}</h3>${I.om?`<p>${esc(I.om)}</p>`:''}<h4>Det här lär du dig</h4><ul>${I.lar.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+  <h4>Innan du börjar</h4><p>${esc(I.fore)}</p>${I.ord?`<h4>Ord att kunna</h4><ul>${I.ord.map(x=>`<li><b>${esc(x[0])}</b> – <span>${esc(x[1])}</span></li>`).join('')}</ul>`:''}
+  ${I.tips?`<h4>Tips</h4><p>${esc(I.tips)}</p>`:''}<h4>Så går en lektion till</h4><p>${esc(KINTRO_HUR)}</p>
+  <div class="dl-btns"><button type="button" class="pri" id="kIntroOk">${first?'Börja':'Stäng'}</button></div>`);
+ $('kIntroOk').onclick=()=>{$('rtDlg').hidden=true;};}
+function kRenderTop(){const ls=KC().lessons;kTop.innerHTML=`<span class="k-kname">${esc(KC().name)}</span>${KC().intro?'<button type="button" class="k-exit" id="kIntroBtn">Om kursen</button>':''}<ol class="k-steps">${ls.map((l,i)=>`<li><button type="button" data-kl="${i}" class="${i===kLi?'cur':''}${kp().done.includes(i)?' done':''}" aria-current="${i===kLi?'step':'false'}"><span class="n">${kp().done.includes(i)&&i!==kLi?'✓':i+1}</span><span class="t">${esc(l.short)}</span></button></li>`).join('')}</ol><button type="button" class="k-exit" id="kExit">${esc(KC().endLabel||'Avsluta kursen')}</button>`;if($('kIntroBtn'))$('kIntroBtn').onclick=()=>kIntro(false);
  kTop.querySelectorAll('[data-kl]').forEach(b=>b.onclick=()=>kLoad(+b.dataset.kl));$('kExit').onclick=()=>kursEnd();}
 let kTries=0,kShown=false;
 function kRenderCard(){const L=KL();let r=kRes||{msgs:[]};
@@ -8184,6 +8358,7 @@ function kOverlay(){if(!kursOn||stockMode||mode3D)return;const c=ctx;c.save();
 function kEN(s,L){if(!window.cncCodeEN||!window.cncI18n||cncI18n.lang!=='en')return s;let x=cncCodeEN(s);const t=cncI18n.tr(L.t).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[’']/g,'').toUpperCase();return x.replace(/^\(COURSE (\d+) · LESSON (\d+)(?:: [^)]*)?\)/,(m,k,l)=>'(COURSE '+k+' · LESSON '+l+': '+t+')');}
 function kLoad(i){kLi=Math.max(0,Math.min(KC().lessons.length-1,i));kp().cur=kLi;kpSave();kOk=false;kShowHint=false;kRes=null;kTries=0;kShown=false;const L=KL();
  document.documentElement.classList.toggle('k-blind',!!L.blind);
+ if(L.type==='match'&&!L.segs&&L.solution){try{L.segs=kSegsFrom(parseGcode(L.solution).paths,L.top);}catch(e){L.segs=[];}}
  const KM=L.type==='match'?kMatchDraw(L):null;
  kTarget=L.type==='g0'?[L.pts[0]]:L.type==='drill'?null:L.paths?null:L.pts?kTargetPts(L):null;
  kTargets=L.paths?L.paths.map((P,q)=>kTargetPts({pts:P,arcs:L.arcs&&L.arcs[q]})):L.rect?[[[L.rect[0],L.rect[1]],[L.rect[0],L.rect[3]],[L.rect[2],L.rect[3]],[L.rect[2],L.rect[1]],[L.rect[0],L.rect[1]]]]:L.circ?[Array.from({length:73},(_,k)=>[L.circ[0]+L.circ[2]*Math.cos(k/72*2*Math.PI),L.circ[1]+L.circ[2]*Math.sin(k/72*2*Math.PI)])]:null;
@@ -8195,7 +8370,7 @@ function kursStart(i,c){kC=c!=null?c:(KP.lastC||0);if(!KURSER[kC])kC=0;KP.lastC=
   kursOn=true;document.documentElement.classList.add('rt-kurs');kTop.hidden=kCard.hidden=kBar.hidden=false;
   if(stockMode)$('cncFrasBtn').click();if(mode3D){const t=$('toggle3D');t.checked=false;t.dispatchEvent(new Event('change',{bubbles:true}));}
   const dl=KC().dialect||'fanuc';if(window.RITA_DIALECT!==dl&&window.ritaSetDialect)window.ritaSetDialect(dl,true);dispatchEvent(new Event('resize'));}
- kLoad(i);}
+ kLoad(i);if(KC().intro&&!kp().intro){kp().intro=1;kpSave();setTimeout(()=>kIntro(true),60);}}
 function kursEnd(){if(!kursOn)return;kursOn=false;document.documentElement.classList.remove('k-blind');if(kWcs&&typeof wcsTable!=='undefined'){wcsTable.splice(0,wcsTable.length,...kWcs);kWcs=null;}document.documentElement.classList.remove('rt-kurs');kTop.hidden=kCard.hidden=kBar.hidden=true;kTarget=kHoles=null;
  const s=kSaved;kSaved=null;if(s){if(s.dialect&&window.ritaSetDialect)window.ritaSetDialect(s.dialect,true);loadTextIntoEditor((s.setup||'')+s.code);if(s.stock&&!stockMode)$('cncFrasBtn').click();}
  try{localStorage.removeItem('rita-kurs-backup');}catch(e){}dispatchEvent(new Event('resize'));msg('Kursen är avslutad, ditt program är tillbaka.');}
@@ -8205,7 +8380,7 @@ addEventListener('gv-vy-storlek',()=>{if(kursOn&&!stockMode&&!mode3D){kView();wi
 /* egna kurser, till exempel uppgifter från en lärare. grade rättar kod utan att röra kodfältet. */
 function kursCustom(K,i){let c=KURSER.findIndex(k=>k.id===K.id);if(c<0){KURSER.push(K);c=KURSER.length-1;}else KURSER[c]=K;if(kursOn&&kC!==c)kursEnd();kursStart(i||0,c);}
 function kGrade(L,code){let ps=[];try{ps=parseGcode(code).paths||[];}catch(e){}return kEvalMatch(L,ps);}
-window.ritaKurs={start:kursStart,end:kursEnd,custom:kursCustom,grade:kGrade,segs:(ps,top)=>kSegsFrom(ps,top),get on(){return kursOn;},get id(){return kursOn?KC().id:null;},get li(){return kLi;},check:kCheckNow};
+window.ritaKurs={start:kursStart,end:kursEnd,custom:kursCustom,grade:kGrade,segs:(ps,top)=>kSegsFrom(ps,top),get on(){return kursOn;},get id(){return kursOn?KC().id:null;},get li(){return kLi;},get kurser(){return KURSER;},check:kCheckNow};
 const _g=drawGrid;drawGrid=function(){const r=_g.apply(this,arguments);try{kOverlay();}catch(e){}return r;};   // ritningen under programmets bana
 const _d=drawFromText;drawFromText=function(){const r=_d.apply(this,arguments);try{kAfterDraw();}catch(e){}return r;};
 /* sidan stängdes mitt i en kurs: lägg tillbaka det egna programmet */
@@ -9111,7 +9286,7 @@ if(ch){saveJSON('gkodviz_tools_v1',toolTable);try{drawFromText(false);}catch(e){
 if(/Android|iPhone|iPad|CrOS/.test(u)){b.remove();return;}if(os)b.textContent='⬇ Ladda ned för '+os;})();</script>
 <script>
 /* ritningarna på engelska: namn, ämne och uppgift översätts i datan innan de visas */
-(function(){if(!window.cncI18n||cncI18n.lang!=='en'||typeof DRAWINGS==='undefined')return;const M={"Rakt spår": "Straight slot", "G0/G1 · första programmet": "G0/G1 · your first program", "Rektangelspår": "Rectangular slot", "G1 · absoluta mått (G90)": "G1 · absolute positioning (G90)", "Trappspår": "Staircase slot", "G1 · koordinatmått": "G1 · coordinate dimensions", "Triangelspår": "Triangle slot", "G1 · sneda linjer": "G1 · angled lines", "Sicksackspår": "Zigzag slot", "G91 · inkrementella mått": "G91 · incremental positioning", "Hörnspår": "Corner slot", "G2 · en båge": "G2 · one arc", "Ovalt spår": "Oval slot", "G3 · två halvcirklar": "G3 · two half circles", "Cirkelspår": "Circular slot", "Hel cirkel · nollpunkt i mitten": "Full circle · work zero in the center", "Hålbild": "Hole pattern", "Borrcykler G81/G83": "Canned cycles G81/G83", "Bultcirkel": "Bolt circle", "Räkna ut koordinater": "Calculate coordinates", "Rektangulär ansats": "Rectangular shoulder", "G41 · första konturen": "G41 · the first profile", "Rundad platta": "Rounded plate", "G41 · rundade hörn": "G41 · rounded corners", "Fasad platta": "Chamfered plate", "G41 · fasade hörn": "G41 · chamfered corners", "Fäste": "Bracket", "Kontur med båge och fas + hål": "Profile with arc and chamfer + hole", "Platta med urtag": "Plate with a notch", "Inåtgående båge (G3) + hål": "Inward arc (G3) + holes", "Rektangulär ficka": "Rectangular pocket", "Ficka · räkna verktygsbanan": "Pocket · calculate the toolpath", "Cirkulär ficka": "Circular pocket", "Ficka · cirkelvarv": "Pocket · circular passes", "Hållare med ficka": "Holder with a pocket", "Ficka + hålbild": "Pocket + hole pattern", "Flans": "Flange", "Runt ämne · säte + bultcirkel 45°": "Round stock · seat + bolt circle 45°", "Slutprov: Hållare": "Final test: Holder", "Kontur + ficka + hål": "Profile + pocket + holes", "Ditt första program: fräs ett rakt spår med <b>T1</b> (pinnfräs Ø6). Spåret är lika brett som fräsen, så verktygets centrum följer spårets mittlinje (streckprickad). Gå snabbt (G0) till startpunkten, ner 2 mm med G1, fräs till slutpunkten och kör upp igen.": "Your first program: mill a straight slot with <b>T1</b> (end mill Ø6). The slot is as wide as the cutter, so the tool center follows the slot center line (dash-dot). Rapid (G0) to the start point, down 2 mm with G1, mill to the end point and go back up.", "Fräs spåret med <b>T1</b> (pinnfräs Ø6). Verktygets centrum följer spårets mittlinje, så du behöver ingen radiekompensering. Spårdjup 2 mm. Använd absoluta mått (G90): alla koordinater räknas från nollpunkten.": "Mill the slot with <b>T1</b> (end mill Ø6). The tool center follows the slot center line, so you need no cutter compensation. Slot depth 2 mm. Use absolute positioning (G90): all coordinates are measured from work zero.", "Måtten är <b>koordinatmått</b>: siffran vid varje linje är avståndet från nollpunkten, alltså precis den X eller Y du skriver i programmet. Fräs trappan med <b>T1</b>, spårdjup 2 mm. Tips: när bara X eller bara Y ändras räcker det att skriva den axeln.": "The dimensions are <b>coordinate dimensions</b>: the number at each line is the distance from work zero, exactly the X or Y you write in the program. Mill the staircase with <b>T1</b>, slot depth 2 mm. Tip: when only X or only Y changes, it is enough to write that axis.", "En sned linje får du när både X och Y ändras på samma rad, till exempel <b>G1 X50 Y50</b>. Fräs triangeln med T1, spårdjup 2 mm, och avsluta i startpunkten.": "You get an angled line when both X and Y change on the same line, for example <b>G1 X50 Y50</b>. Mill the triangle with T1, slot depth 2 mm, and finish at the start point.", "Måtten är <b>kedjemått</b>: varje mått räknas från förra punkten. Gå ner i startpunkten X10 Y10 och skriv sedan spåret med <b>G91</b> (inkrementellt). Byt tillbaka till G90 innan du kör upp och avslutar. Verktyg T1, spårdjup 2 mm.": "The dimensions are <b>chain dimensions</b>: each one is measured from the previous point. Go down at the start point X10 Y10 and then write the slot with <b>G91</b> (incremental). Switch back to G90 before you go up and finish. Tool T1, slot depth 2 mm.", "Spåret har en båge <b>R15</b> (radien gäller mittlinjen). Bågen går medurs, alltså <b>G2</b>. Skriv slutpunkten och antingen R15 eller I/J (avståndet från bågens startpunkt till centrum). T1, spårdjup 2 mm.": "The slot has an arc <b>R15</b> (the radius applies to the center line). The arc goes clockwise, so <b>G2</b>. Write the end point and either R15 or I/J (the distance from the arc start point to the center). T1, slot depth 2 mm.", "Spåret består av två raka delar och två halvcirklar <b>R15</b> (radien gäller mittlinjen). Använd G2/G3 med I/J eller R. G2 går medurs och G3 moturs, sett ovanifrån. T1, spårdjup 3 mm.": "The slot is two straight parts and two half circles <b>R15</b> (the radius applies to the center line). Use G2/G3 with I/J or R. G2 goes clockwise and G3 counterclockwise, seen from above. T1, slot depth 3 mm.", "Nollpunkten ligger nu <b>mitt i cirkeln</b>, så vänster om och under centrum blir koordinaterna negativa. En hel cirkel kan skrivas på en enda rad: slutpunkten är samma som startpunkten, och I/J pekar på centrum (R fungerar inte för en hel cirkel). T1, spårdjup 2 mm.": "Work zero is now <b>in the center of the circle</b>, so left of and below the center the coordinates are negative. A full circle can be written on one line: the end point is the same as the start point, and I/J point to the center (R does not work for a full circle). T1, slot depth 2 mm.", "Borra de fyra Ø6-hålen med <b>T9</b> och en G81-cykel. Med G99 går borren tillbaka till R-planet mellan hålen, och nästa hål behöver bara den nya X- eller Y-koordinaten. Borra mitthålet Ø10 med <b>T13</b> och G83 (stegborrning). Genomgående hål: borra till Z-22 så att borren kommer igenom ämnet.": "Drill the four Ø6 holes with <b>T9</b> and a G81 cycle. With G99 the drill returns to the R plane between holes, and the next hole only needs the new X or Y coordinate. Drill the Ø10 center hole with <b>T13</b> and G83 (peck drilling). Through holes: drill to Z-22 so the drill comes through the stock.", "Sex hål sitter jämnt fördelade på en delningscirkel Ø40, alltså 60° mellan hålen. Räkna ut varje håls koordinater: <b>X = 20 · cos v</b> och <b>Y = 20 · sin v</b>, där v är vinkeln från X-axeln (0°, 60°, 120° …). Avrunda till två decimaler. Borra med <b>T8</b> och G81, djup 10.": "Six holes are evenly spaced on a Ø40 bolt circle, so 60° between holes. Work out each hole’s coordinates: <b>X = 20 · cos a</b> and <b>Y = 20 · sin a</b>, where a is the angle from the X axis (0°, 60°, 120° …). Round to two decimals. Drill with <b>T8</b> and G81, depth 10.", "Nu programmerar du <b>detaljens kontur</b> i stället för verktygets centrum. Med <b>G41 D3</b> lägger styrningen själv verktyget en halv diameter (7,5 mm) utanför konturen, till vänster om rörelseriktningen. Börja utanför ämnet, slå på G41 på en rak inkörning, gå runt medurs och stäng av med G40 på väg ut. T3, djup 5 mm.": "Now you program <b>the part profile</b> instead of the tool center. With <b>G41 D3</b> the control itself puts the tool half a diameter (7.5 mm) outside the profile, to the left of the direction of travel. Start outside the stock, turn on G41 on a straight lead-in, go around clockwise and cancel with G40 on the way out. T3, depth 5 mm.", "Fräs ytterkonturen 5 mm ner med <b>T3</b> och <b>G41 D3</b>. Hörnen är R8: varje hörn blir en G2-båge när du går runt medurs. Nollpunkten ligger mitt på detaljen, så måtten är symmetriska.": "Mill the outside profile 5 mm down with <b>T3</b> and <b>G41 D3</b>. The corners are R8: each corner is a G2 arc when you go around clockwise. Work zero is at the center of the part, so the dimensions are symmetrical.", "Hörnen har fasen <b>8 × 45°</b>: varje fas är en sned G1-rörelse. Räkna ut fasernas start- och slutpunkter från yttermåtten 70 × 50 (till exempel börjar fasen uppe till höger i X27 Y25). Fräs konturen 5 mm ner med T3 och G41 D3.": "The corners have an <b>8 × 45°</b> chamfer: each chamfer is an angled G1 move. Work out the start and end points of the chamfers from the overall size 70 × 50 (for example the top right chamfer starts at X27 Y25). Mill the profile 5 mm down with T3 and G41 D3.", "Fräs konturen 5 mm ner med <b>T3</b> och <b>G41 D3</b>. Rundningen är R15 och fasen 10 × 45°. Borra sedan hålet Ø8, djup 15, med <b>T11</b> (G81 eller G83). Två verktyg betyder verktygsbyte mitt i programmet.": "Mill the profile 5 mm down with <b>T3</b> and <b>G41 D3</b>. The rounding is R15 and the chamfer 10 × 45°. Then drill the Ø8 hole, depth 15, with <b>T11</b> (G81 or G83). Two tools means a tool change in the middle of the program.", "Urtaget R10 är en <b>inåtgående</b> båge. Fast du går runt detaljen medurs blir urtaget en <b>G3</b>-båge (moturs). Det fungerar med G41 eftersom radien (10) är större än fräsens radie (7,5). Fräs konturen 5 mm ner med T3 och G41 D3, och borra sedan de två hålen med T9.": "The R10 notch is an <b>inward</b> arc. Even though you go around the part clockwise, the notch is a <b>G3</b> arc (counterclockwise). It works with G41 because the radius (10) is larger than the cutter radius (7.5). Mill the profile 5 mm down with T3 and G41 D3, then drill the two holes with T9.", "En ficka ska tömmas helt. Fräs den med <b>T2</b> (Ø10) utan radiekompensering: verktygets centrum måste då hålla sig 5 mm (halva diametern) innanför fickans kant, alltså X−15…15 och Y−7…7. Gå först längs mitten och sedan ett varv runt. Hörnradien R5 blir då lika med fräsens radie. Djup 4 mm.": "A pocket must be fully cleared. Mill it with <b>T2</b> (Ø10) without cutter compensation: the tool center must then stay 5 mm (half the diameter) inside the pocket edge, so X−15…15 and Y−7…7. First go along the middle and then one lap around. The R5 corner radius then equals the cutter radius. Depth 4 mm.", "Töm fickan Ø30 med <b>T2</b> (Ø10). Gå ner i centrum och fräs sedan hela cirkelvarv utåt. Verktygets centrum får gå högst 10 mm från centrum (15 − 5). Ett varv med radie 5 och ett med radie 10 räcker för att ta bort allt. Djup 5 mm.": "Clear the Ø30 pocket with <b>T2</b> (Ø10). Go down at the center and then mill full circles outward. The tool center may go at most 10 mm from the center (15 − 5). One lap at radius 5 and one at radius 10 are enough to remove everything. Depth 5 mm.", "Töm fickan 50 × 30 med <b>T2</b> (Ø10) på samma sätt som i R-16: verktygets centrum håller sig 5 mm innanför kanten. Djup 5 mm. Byt sedan till <b>T9</b> och borra de fyra hörnhålen med G81.": "Clear the 50 × 30 pocket with <b>T2</b> (Ø10) the same way as in R-16: the tool center stays 5 mm inside the edge. Depth 5 mm. Then change to <b>T9</b> and drill the four corner holes with G81.", "Ämnet är <b>runt</b> (Ø80, 15 tjockt). Fräs sätet Ø20, djup 5, med <b>T2</b>: ett cirkelvarv med radie 5 runt centrum. Borra sedan fyra genomgående hål Ø6 på delningscirkeln Ø60, vid 45°, 135°, 225° och 315°. Räkna ut koordinaterna (30 · cos 45° ≈ 21,21) och borra med <b>T9</b> och G83 till Z-17.": "The stock is <b>round</b> (Ø80, 15 thick). Mill the Ø20 seat, depth 5, with <b>T2</b>: one lap at radius 5 around the center. Then drill four Ø6 through holes on the Ø60 bolt circle, at 45°, 135°, 225° and 315°. Work out the coordinates (30 · cos 45° ≈ 21.21) and drill with <b>T9</b> and G83 to Z-17.", "Hela detaljen i ett program med tre verktyg. 1) Fräs ytterkonturen 5 mm ner med <b>T3</b> och G41 D3 (hörnen R10). 2) Töm fickan 40 × 20, djup 4, med <b>T2</b>. 3) Borra de två hålen Ø8, djup 15, med <b>T11</b>. Kontrollera resultatet med CNC-Fräs.": "The whole part in one program with three tools. 1) Mill the outside profile 5 mm down with <b>T3</b> and G41 D3 (R10 corners). 2) Clear the 40 × 20 pocket, depth 4, with <b>T2</b>. 3) Drill the two Ø8 holes, depth 15, with <b>T11</b>. Check the result with the CNC mill."},tr=cncI18n.tr;
+(function(){if(!window.cncI18n||cncI18n.lang!=='en'||typeof DRAWINGS==='undefined')return;const M={"Rund tapp, mjuk in och ut": "Round boss, smooth in and out", "G41 · mjuk in- och utgång": "G41 · smooth lead-in and lead-out", "Skylt med fasar, mjuk ut": "Sign plate with chamfers, smooth out", "G41 · tangentiell in- och utgång": "G41 · tangential lead-in and lead-out", "Fräs tappen Ø40 5 mm ner med <b>T3</b> och <b>G41 D3</b>, medurs runt utsidan. Gå in och ut <b>mjukt</b>: kör in med G41 på en rak rörelse, glid in på cirkeln högst upp med en båge <b>R12</b> och lämna den med en likadan båge. Bågens radie ska vara större än fräsens radie 7,5 mm.": "Mill the Ø40 boss 5 mm deep with <b>T3</b> and <b>G41 D3</b>, clockwise around the outside. Go in and out <b>smoothly</b>: lead in with G41 on a straight move, glide onto the circle at the top on an <b>R12</b> arc and leave it on a matching arc. The arc radius must be larger than the cutter radius 7.5 mm.", "Fräs skylten 3 mm ner med <b>T3</b> och <b>G41 D3</b>, medurs. Kör in längs översidans förlängning från vänster, så att fräsen kommer in i konturens riktning. När konturen är runt fortsätter du 10 mm längs översidan och går ut <b>mjukt</b> med en båge <b>R10</b> uppåt, innan G40.": "Mill the sign plate 3 mm deep with <b>T3</b> and <b>G41 D3</b>, clockwise. Lead in along the extension of the top edge from the left, so the cutter comes in in the direction of the profile. When the profile is complete, continue 10 mm along the top and leave <b>smoothly</b> on an <b>R10</b> arc upward, before G40.", "Rakt spår": "Straight slot", "G0/G1 · första programmet": "G0/G1 · your first program", "Rektangelspår": "Rectangular slot", "G1 · absoluta mått (G90)": "G1 · absolute positioning (G90)", "Trappspår": "Staircase slot", "G1 · koordinatmått": "G1 · coordinate dimensions", "Triangelspår": "Triangle slot", "G1 · sneda linjer": "G1 · angled lines", "Sicksackspår": "Zigzag slot", "G91 · inkrementella mått": "G91 · incremental positioning", "Hörnspår": "Corner slot", "G2 · en båge": "G2 · one arc", "Ovalt spår": "Oval slot", "G3 · två halvcirklar": "G3 · two half circles", "Cirkelspår": "Circular slot", "Hel cirkel · nollpunkt i mitten": "Full circle · work zero in the center", "Hålbild": "Hole pattern", "Borrcykler G81/G83": "Canned cycles G81/G83", "Bultcirkel": "Bolt circle", "Räkna ut koordinater": "Calculate coordinates", "Rektangulär ansats": "Rectangular shoulder", "G41 · första konturen": "G41 · the first profile", "Rundad platta": "Rounded plate", "G41 · rundade hörn": "G41 · rounded corners", "Fasad platta": "Chamfered plate", "G41 · fasade hörn": "G41 · chamfered corners", "Fäste": "Bracket", "Kontur med båge och fas + hål": "Profile with arc and chamfer + hole", "Platta med urtag": "Plate with a notch", "Inåtgående båge (G3) + hål": "Inward arc (G3) + holes", "Rektangulär ficka": "Rectangular pocket", "Ficka · räkna verktygsbanan": "Pocket · calculate the toolpath", "Cirkulär ficka": "Circular pocket", "Ficka · cirkelvarv": "Pocket · circular passes", "Hållare med ficka": "Holder with a pocket", "Ficka + hålbild": "Pocket + hole pattern", "Flans": "Flange", "Runt ämne · säte + bultcirkel 45°": "Round stock · seat + bolt circle 45°", "Slutprov: Hållare": "Final test: Holder", "Kontur + ficka + hål": "Profile + pocket + holes", "Ditt första program: fräs ett rakt spår med <b>T1</b> (pinnfräs Ø6). Spåret är lika brett som fräsen, så verktygets centrum följer spårets mittlinje (streckprickad). Gå snabbt (G0) till startpunkten, ner 2 mm med G1, fräs till slutpunkten och kör upp igen.": "Your first program: mill a straight slot with <b>T1</b> (end mill Ø6). The slot is as wide as the cutter, so the tool center follows the slot center line (dash-dot). Rapid (G0) to the start point, down 2 mm with G1, mill to the end point and go back up.", "Fräs spåret med <b>T1</b> (pinnfräs Ø6). Verktygets centrum följer spårets mittlinje, så du behöver ingen radiekompensering. Spårdjup 2 mm. Använd absoluta mått (G90): alla koordinater räknas från nollpunkten.": "Mill the slot with <b>T1</b> (end mill Ø6). The tool center follows the slot center line, so you need no cutter compensation. Slot depth 2 mm. Use absolute positioning (G90): all coordinates are measured from work zero.", "Måtten är <b>koordinatmått</b>: siffran vid varje linje är avståndet från nollpunkten, alltså precis den X eller Y du skriver i programmet. Fräs trappan med <b>T1</b>, spårdjup 2 mm. Tips: när bara X eller bara Y ändras räcker det att skriva den axeln.": "The dimensions are <b>coordinate dimensions</b>: the number at each line is the distance from work zero, exactly the X or Y you write in the program. Mill the staircase with <b>T1</b>, slot depth 2 mm. Tip: when only X or only Y changes, it is enough to write that axis.", "En sned linje får du när både X och Y ändras på samma rad, till exempel <b>G1 X50 Y50</b>. Fräs triangeln med T1, spårdjup 2 mm, och avsluta i startpunkten.": "You get an angled line when both X and Y change on the same line, for example <b>G1 X50 Y50</b>. Mill the triangle with T1, slot depth 2 mm, and finish at the start point.", "Måtten är <b>kedjemått</b>: varje mått räknas från förra punkten. Gå ner i startpunkten X10 Y10 och skriv sedan spåret med <b>G91</b> (inkrementellt). Byt tillbaka till G90 innan du kör upp och avslutar. Verktyg T1, spårdjup 2 mm.": "The dimensions are <b>chain dimensions</b>: each one is measured from the previous point. Go down at the start point X10 Y10 and then write the slot with <b>G91</b> (incremental). Switch back to G90 before you go up and finish. Tool T1, slot depth 2 mm.", "Spåret har en båge <b>R15</b> (radien gäller mittlinjen). Bågen går medurs, alltså <b>G2</b>. Skriv slutpunkten och antingen R15 eller I/J (avståndet från bågens startpunkt till centrum). T1, spårdjup 2 mm.": "The slot has an arc <b>R15</b> (the radius applies to the center line). The arc goes clockwise, so <b>G2</b>. Write the end point and either R15 or I/J (the distance from the arc start point to the center). T1, slot depth 2 mm.", "Spåret består av två raka delar och två halvcirklar <b>R15</b> (radien gäller mittlinjen). Använd G2/G3 med I/J eller R. G2 går medurs och G3 moturs, sett ovanifrån. T1, spårdjup 3 mm.": "The slot is two straight parts and two half circles <b>R15</b> (the radius applies to the center line). Use G2/G3 with I/J or R. G2 goes clockwise and G3 counterclockwise, seen from above. T1, slot depth 3 mm.", "Nollpunkten ligger nu <b>mitt i cirkeln</b>, så vänster om och under centrum blir koordinaterna negativa. En hel cirkel kan skrivas på en enda rad: slutpunkten är samma som startpunkten, och I/J pekar på centrum (R fungerar inte för en hel cirkel). T1, spårdjup 2 mm.": "Work zero is now <b>in the center of the circle</b>, so left of and below the center the coordinates are negative. A full circle can be written on one line: the end point is the same as the start point, and I/J point to the center (R does not work for a full circle). T1, slot depth 2 mm.", "Borra de fyra Ø6-hålen med <b>T9</b> och en G81-cykel. Med G99 går borren tillbaka till R-planet mellan hålen, och nästa hål behöver bara den nya X- eller Y-koordinaten. Borra mitthålet Ø10 med <b>T13</b> och G83 (stegborrning). Genomgående hål: borra till Z-22 så att borren kommer igenom ämnet.": "Drill the four Ø6 holes with <b>T9</b> and a G81 cycle. With G99 the drill returns to the R plane between holes, and the next hole only needs the new X or Y coordinate. Drill the Ø10 center hole with <b>T13</b> and G83 (peck drilling). Through holes: drill to Z-22 so the drill comes through the stock.", "Sex hål sitter jämnt fördelade på en delningscirkel Ø40, alltså 60° mellan hålen. Räkna ut varje håls koordinater: <b>X = 20 · cos v</b> och <b>Y = 20 · sin v</b>, där v är vinkeln från X-axeln (0°, 60°, 120° …). Avrunda till två decimaler. Borra med <b>T8</b> och G81, djup 10.": "Six holes are evenly spaced on a Ø40 bolt circle, so 60° between holes. Work out each hole’s coordinates: <b>X = 20 · cos a</b> and <b>Y = 20 · sin a</b>, where a is the angle from the X axis (0°, 60°, 120° …). Round to two decimals. Drill with <b>T8</b> and G81, depth 10.", "Nu programmerar du <b>detaljens kontur</b> i stället för verktygets centrum. Med <b>G41 D3</b> lägger styrningen själv verktyget en halv diameter (7,5 mm) utanför konturen, till vänster om rörelseriktningen. Börja utanför ämnet, slå på G41 på en rak inkörning, gå runt medurs och stäng av med G40 på väg ut. T3, djup 5 mm.": "Now you program <b>the part profile</b> instead of the tool center. With <b>G41 D3</b> the control itself puts the tool half a diameter (7.5 mm) outside the profile, to the left of the direction of travel. Start outside the stock, turn on G41 on a straight lead-in, go around clockwise and cancel with G40 on the way out. T3, depth 5 mm.", "Fräs ytterkonturen 5 mm ner med <b>T3</b> och <b>G41 D3</b>. Hörnen är R8: varje hörn blir en G2-båge när du går runt medurs. Nollpunkten ligger mitt på detaljen, så måtten är symmetriska.": "Mill the outside profile 5 mm down with <b>T3</b> and <b>G41 D3</b>. The corners are R8: each corner is a G2 arc when you go around clockwise. Work zero is at the center of the part, so the dimensions are symmetrical.", "Hörnen har fasen <b>8 × 45°</b>: varje fas är en sned G1-rörelse. Räkna ut fasernas start- och slutpunkter från yttermåtten 70 × 50 (till exempel börjar fasen uppe till höger i X27 Y25). Fräs konturen 5 mm ner med T3 och G41 D3.": "The corners have an <b>8 × 45°</b> chamfer: each chamfer is an angled G1 move. Work out the start and end points of the chamfers from the overall size 70 × 50 (for example the top right chamfer starts at X27 Y25). Mill the profile 5 mm down with T3 and G41 D3.", "Fräs konturen 5 mm ner med <b>T3</b> och <b>G41 D3</b>. Rundningen är R15 och fasen 10 × 45°. Borra sedan hålet Ø8, djup 15, med <b>T11</b> (G81 eller G83). Två verktyg betyder verktygsbyte mitt i programmet.": "Mill the profile 5 mm down with <b>T3</b> and <b>G41 D3</b>. The rounding is R15 and the chamfer 10 × 45°. Then drill the Ø8 hole, depth 15, with <b>T11</b> (G81 or G83). Two tools means a tool change in the middle of the program.", "Urtaget R10 är en <b>inåtgående</b> båge. Fast du går runt detaljen medurs blir urtaget en <b>G3</b>-båge (moturs). Det fungerar med G41 eftersom radien (10) är större än fräsens radie (7,5). Fräs konturen 5 mm ner med T3 och G41 D3, och borra sedan de två hålen med T9.": "The R10 notch is an <b>inward</b> arc. Even though you go around the part clockwise, the notch is a <b>G3</b> arc (counterclockwise). It works with G41 because the radius (10) is larger than the cutter radius (7.5). Mill the profile 5 mm down with T3 and G41 D3, then drill the two holes with T9.", "En ficka ska tömmas helt. Fräs den med <b>T2</b> (Ø10) utan radiekompensering: verktygets centrum måste då hålla sig 5 mm (halva diametern) innanför fickans kant, alltså X−15…15 och Y−7…7. Gå först längs mitten och sedan ett varv runt. Hörnradien R5 blir då lika med fräsens radie. Djup 4 mm.": "A pocket must be fully cleared. Mill it with <b>T2</b> (Ø10) without cutter compensation: the tool center must then stay 5 mm (half the diameter) inside the pocket edge, so X−15…15 and Y−7…7. First go along the middle and then one lap around. The R5 corner radius then equals the cutter radius. Depth 4 mm.", "Töm fickan Ø30 med <b>T2</b> (Ø10). Gå ner i centrum och fräs sedan hela cirkelvarv utåt. Verktygets centrum får gå högst 10 mm från centrum (15 − 5). Ett varv med radie 5 och ett med radie 10 räcker för att ta bort allt. Djup 5 mm.": "Clear the Ø30 pocket with <b>T2</b> (Ø10). Go down at the center and then mill full circles outward. The tool center may go at most 10 mm from the center (15 − 5). One lap at radius 5 and one at radius 10 are enough to remove everything. Depth 5 mm.", "Töm fickan 50 × 30 med <b>T2</b> (Ø10) på samma sätt som i R-16: verktygets centrum håller sig 5 mm innanför kanten. Djup 5 mm. Byt sedan till <b>T9</b> och borra de fyra hörnhålen med G81.": "Clear the 50 × 30 pocket with <b>T2</b> (Ø10) the same way as in R-16: the tool center stays 5 mm inside the edge. Depth 5 mm. Then change to <b>T9</b> and drill the four corner holes with G81.", "Ämnet är <b>runt</b> (Ø80, 15 tjockt). Fräs sätet Ø20, djup 5, med <b>T2</b>: ett cirkelvarv med radie 5 runt centrum. Borra sedan fyra genomgående hål Ø6 på delningscirkeln Ø60, vid 45°, 135°, 225° och 315°. Räkna ut koordinaterna (30 · cos 45° ≈ 21,21) och borra med <b>T9</b> och G83 till Z-17.": "The stock is <b>round</b> (Ø80, 15 thick). Mill the Ø20 seat, depth 5, with <b>T2</b>: one lap at radius 5 around the center. Then drill four Ø6 through holes on the Ø60 bolt circle, at 45°, 135°, 225° and 315°. Work out the coordinates (30 · cos 45° ≈ 21.21) and drill with <b>T9</b> and G83 to Z-17.", "Hela detaljen i ett program med tre verktyg. 1) Fräs ytterkonturen 5 mm ner med <b>T3</b> och G41 D3 (hörnen R10). 2) Töm fickan 40 × 20, djup 4, med <b>T2</b>. 3) Borra de två hålen Ø8, djup 15, med <b>T11</b>. Kontrollera resultatet med CNC-Fräs.": "The whole part in one program with three tools. 1) Mill the outside profile 5 mm down with <b>T3</b> and G41 D3 (R10 corners). 2) Clear the 40 × 20 pocket, depth 4, with <b>T2</b>. 3) Drill the two Ø8 holes, depth 15, with <b>T11</b>. Check the result with the CNC mill."},tr=cncI18n.tr;
 cncI18n.add({exact:Object.assign({},M,{'⚙ Ämne':'⚙ Stock','Verktygslåda':'Tool box','Välj en ritning och skriv G-koden själv. Ritningen öppnas i ett eget fönster som ligger överst och som du kan flytta.':'Pick a drawing and write the G-code yourself. The drawing opens in its own window on top that you can move.','Nivå 1 · raka linjer':'Level 1 · straight lines','Nivå 2 · bågar och hål':'Level 2 · arcs and holes','Nivå 3 · konturer (G41)':'Level 3 · profiles (G41)','Nivå 4 · fickor och hela detaljer':'Level 4 · pockets and complete parts'}),rx:[[/^(R-\d+) · (.+)$/,(m,a,b)=>a+' · '+(M[b]||b)],[/^Nivå (\d) · (.+)$/,(m,a,b)=>'Level '+a+' · '+(M[b]||b)]]});
 DRAWINGS.forEach(d=>{['name','topic','task'].forEach(k=>{if(typeof d[k]==='string')d[k]=M[d[k]]||tr(d[k]);});['origin','tool'].forEach(k=>{if(typeof d[k]==='string')d[k]=d[k].split(', ').map(x=>tr(x)).join(', ');});});
 try{if(typeof renderDrawingsList==='function')renderDrawingsList();}catch(e){}})();
