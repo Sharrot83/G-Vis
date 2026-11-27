@@ -19,7 +19,7 @@ window.cncI18n.add({exact:{
 'Ämnet är en rund stång i chucken. Z0 är planytan, och ämnet sticker ut till Z−längden.':'The stock is a round bar in the chuck. Z0 is the face, and the bar sticks out to Z minus the length.',
 'Diameter (mm)':'Diameter (mm)','Längd ut från chucken (mm)':'Length out of the chuck (mm)','Tillägg på planytan (mm)':'Face allowance (mm)','Material':'Material',
 'Revolvern på svarven. T0101 betyder verktyg 1 med korrigering 1.':'The lathe turret. T0101 means tool 1 with offset 1.','Verktyg':'Tool',
-'Grovsvarvstål CNMG 80° R0,8':'Roughing tool CNMG 80° R0.8','Finsvarvstål DNMG 55° R0,4':'Finishing tool DNMG 55° R0.4','Stickstål 3 mm':'Grooving tool 3 mm',
+'Grovsvarvstål CNMG 80° R0,8':'Roughing tool CNMG 80° R0.8','Slutsvarvstål VNMG 35° R0,4':'Finishing tool VNMG 35° R0.4','Spårstål 3 mm':'Grooving tool 3 mm','Avstickare 3 mm':'Parting tool 3 mm','Finsvarvstål DCMT 55° R0,2':'Fine finishing tool DCMT 55° R0.2','Borr Ø16':'Drill Ø16','Borrstång Ø12 R0,4':'Boring bar Ø12 R0.4','Finsvarvstål DNMG 55° R0,4':'Finishing tool DNMG 55° R0.4','Stickstål 3 mm':'Grooving tool 3 mm',
 'Gängstål 60° utvändig':'Threading tool 60° external','Borr Ø20':'Drill Ø20','Borrstång Ø16 R0,4':'Boring bar Ø16 R0.4','Centrumborr Ø5':'Centre drill Ø5',
 'Stål S235':'Steel S235','Stål C45E':'Steel C45E','Rostfritt 1.4404':'Stainless 1.4404','Aluminium EN AW-6082':'Aluminium EN AW-6082','Mässing CuZn39Pb3':'Brass CuZn39Pb3','Plast POM':'Plastic POM',
 'Plansvarvning och längdsvarvning (G90)':'Facing and turning (G90)','Grov- och slutsvarvning (G71/G70)':'Roughing and finishing (G71/G70)','Spår och avstickning':'Grooves and parting off',
