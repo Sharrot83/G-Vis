@@ -66,6 +66,15 @@ function langBtn(){if(document.getElementById('rtLang')||document.getElementById
   b.style.cssText='font:inherit;font-size:13px;padding:4px 10px;margin-left:8px;border:1px solid currentColor;border-radius:6px;background:transparent;color:inherit;cursor:pointer;opacity:.85';
   if(at.classList&&at.classList.contains('lx-links'))at.appendChild(b);else at.after(b);}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',langBtn);else langBtn();
+/* i programmet finns inte kurssidorna: tillbaka-länkarna och Simulatorer går till programmets startsida, som i G-vis */
+function appBack(){if(!app)return;const home=new URL('../../../index.html',ME||location.href).href,en=lang==='en';
+  document.querySelectorAll('.lx-links a[href$="index.html"]').forEach(a=>a.remove());
+  document.querySelectorAll('a[href$="material.html"],a[href$="simulator.html"]').forEach(a=>{a.href=home;a.removeAttribute('target');a.setAttribute('data-noi18n','');
+    if(a.classList.contains('rt-back')){a.title=en?'Back to the start page':'Tillbaka till startsidan';a.setAttribute('aria-label',a.title);}
+    else if(a.closest('.lx-links'))a.remove();   // lexikonets Simulatorer: startsidan finns redan som Tillbaka
+    else a.textContent='← '+(en?'Start page':'Startsida');});}
+const appBack2=()=>{appBack();setTimeout(appBack,300);setTimeout(appBack,1500);};   // översättningen kan bygga om länkarna, så det görs om en stund senare också
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',appBack2);else appBack2();
 if(lang!=='en')return;
 const SKIP='script,style,textarea,code,kbd,pre,.code-editor,.src,.k-pre,[data-noi18n],.line-numbers';
 const ATTR=['title','aria-label','placeholder','label'];

@@ -7023,7 +7023,7 @@ function examples(){if(window.GV_SVARV&&window.gvLathe)return gvLathe.examples()
   return bs.length?bs.map(b=>({l:b.textContent.trim(),a:()=>b.click()})):[{l:'Inga exempel',dis:true}];}
 function menus(){const L=[
  {t:'Arkiv',i:[{l:'Öppna',k:'Ctrl+O',a:click('openBtn')},{l:'Spara',k:'Ctrl+S',a:click('saveBtn')},{l:'Spara .gvis …',k:'Ctrl+Shift+S',a:()=>window.gvFile&&gvFile.saveGvis()},{l:'Spara .nc …',k:'Ctrl+Alt+S',a:()=>window.gvFile&&gvFile.saveNc()},{sep:1},
-   {l:'Rensa',a:click('clearBtn')},{sep:1},{l:'Översätt till dialekt',sub:[['fanuc','Fanuc'],['haas','Hass'],['linuxcnc','LinuxCNC'],['iso','ISO (DIN 66025)']].map(([k,n])=>({l:n+(window.RITA_DIALECT===k?' (nuvarande)':''),a:()=>window.ritaTranslateTo&&window.ritaTranslateTo(k)}))},{sep:1},{l:'Tillbaka till CNC-Grönt kort',a:()=>{location.href='material.html';}}]},
+   {l:'Rensa',a:click('clearBtn')},{sep:1},{l:'Översätt till dialekt',sub:[['fanuc','Fanuc'],['haas','Hass'],['linuxcnc','LinuxCNC'],['iso','ISO (DIN 66025)']].map(([k,n])=>({l:n+(window.RITA_DIALECT===k?' (nuvarande)':''),a:()=>window.ritaTranslateTo&&window.ritaTranslateTo(k)}))},{sep:1},(window.cncI18n&&cncI18n.app)?{l:'Till startsidan',a:()=>{location.href='../../index.html';}}:{l:'Tillbaka till CNC-Grönt kort',a:()=>{location.href='material.html';}}]},
  {t:'Exempel',i:[...examples(),{sep:1},{l:'Ritningar att öva på …',a:click('drawingsBtn')}]},
  {t:'Visa',i:[{l:'Rita G-kod',k:'Ctrl+Enter',a:click('drawBtn')},{l:'Anpassa vy',a:click('fitBtn')},{sep:1},
    {l:'Teoretisk mittpunkt G2/G3',...chkBox('toggleCenters')},{l:'G/M-kod',...chkBox('toggleGM')},{l:'X/Y/Z/I/J/R',...chkBox('toggleAxis')},{l:'F/S/T/H/D',...chkBox('toggleFST')},
