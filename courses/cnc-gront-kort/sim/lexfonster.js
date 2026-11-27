@@ -34,6 +34,9 @@ function make(){W=document.createElement('div');W.className='lxw';W.hidden=true;
 window.simLex=function(h){if(!W)make();const url='../lexikon.html?inbaddad=1'+(h?'#'+h:'');
   if(!fr.src||!fr.src.includes('lexikon.html'))fr.src=url;else if(h){try{fr.contentWindow.location.hash=h;}catch(e){fr.src=url;}}
   W.hidden=false;};
-document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('a[href*="lexikon.html"]');if(!a||e.ctrlKey||e.metaKey||e.shiftKey)return;
+/* Netlify tar bort .html i länkarna (lexikon.html blir /lexikon), så båda formerna räknas */
+const isLex=a=>{try{return /\/lexikon(\.html)?$/.test(new URL(a.href,location.href).pathname);}catch(_){return false;}};
+window.simIsLex=isLex;
+document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('a[href*="lexikon"]');if(!a||!isLex(a)||e.ctrlKey||e.metaKey||e.shiftKey)return;
   e.preventDefault();const h=(a.getAttribute('href').split('#')[1])||'';window.simLex(h);},true);
 })();

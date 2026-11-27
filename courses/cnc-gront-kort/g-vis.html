@@ -673,7 +673,7 @@
   html[data-theme="light"] .tok-other { color:#7d3aa8; }
   html[data-theme="light"] .line-highlight { background:rgba(31,111,209,.12); }
   /* svarvläget: dölj det som bara hör till fräsen */
-  html.gv-svarv .rt-grp:has(#rtDialect), html.gv-svarv .rt-homegrp, html.gv-svarv .sim-cam button:not([data-cam="3d"]):not([data-cam="2d"]) { display:none; }
+  html.gv-svarv .rt-grp:has(#rtDialect), html.gv-svarv .rt-homegrp, html.gv-svarv .sim-cam button:not([data-cam="3d"]):not([data-cam="2d"]):not([data-cam="cut"]):not(#msBtn) { display:none; }
   .gvl-amne label { display:flex; flex-direction:column; gap:3px; font-size:12px; color:var(--muted); margin:0 0 10px; }
   .gvl-amne input, .gvl-amne select { font:13px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; padding:6px 8px; border:1.5px solid var(--border); border-radius:6px; background:var(--panel2); color:var(--text); }
   .gvl-tab { border-collapse:collapse; width:100%; font-size:13px; } .gvl-tab td, .gvl-tab th { text-align:left; padding:5px 6px; border-bottom:1px solid var(--border); } .gvl-tab td:first-child { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
@@ -7079,7 +7079,7 @@ document.addEventListener('keydown',e=>{if(!(e.ctrlKey||e.metaKey)||e.altKey)ret
   else if(e.key==='Enter'){e.preventDefault();click('drawBtn')();}});
 // filnamn/status till höger i menyraden: antal rader och segment
 const info=$('rtMbInfo'),seg=$('segments'),ta=$('gcode');
-function upd(){const n=ta?ta.value.split('\n').length:0;info.innerHTML='<span id="rtFileName">'+(window.gvFileLabel?gvFileLabel():'program.nc')+'</span><span>'+(window.GV_SVARV?'Hass svarv':window.ritaDialectName?window.ritaDialectName():'Fanuc')+'</span><span>'+n+' rader</span><span><b>'+(seg?seg.textContent:'0')+'</b> segment</span>';}
+function upd(){const n=ta?ta.value.split('\n').length:0;info.innerHTML='<span id="rtFileName">'+(window.gvFileLabel?gvFileLabel():'program.nc')+'</span><span>'+(window.GV_SVARV?(window.gvLathe?gvLathe.dlName():'Hass')+' svarv':window.ritaDialectName?window.ritaDialectName():'Fanuc')+'</span><span>'+n+' rader</span><span><b>'+(seg?seg.textContent:'0')+'</b> segment</span>';}
 if(ta)ta.addEventListener('input',()=>setTimeout(upd,400));if(seg)new MutationObserver(upd).observe(seg,{childList:true,characterData:true,subtree:true});upd();
 })();
 </script>
@@ -7193,8 +7193,8 @@ drawFromText=function(){const r=_draw.apply(this,arguments);try{tlBuild();hud(nu
 const cam=$('rtCam');let rot=false,cut=false,pathOnly=false;
 function webOn(){return typeof stockMode!=='undefined'&&(stockMode||mode3D);}
 function camState(){cam.querySelectorAll('button[data-cam]').forEach(b=>{const k=b.dataset.cam;let on=false,dis=false;
-  if(window.GV_SVARV&&window.gvLathe&&(k==='3d'||k==='2d'))on=(k==='3d')===!!gvLathe.v3;else if(k==='3d')on=stockMode;else if(k==='2d')on=!stockMode&&!mode3D;else if(k==='rot')on=rot;else if(k==='cut')on=cut;else if(k==='path')on=pathOnly;
-  if(['top','front'].includes(k))dis=!webOn();if(k==='cut'||k==='path')dis=!stockMode;
+  if(window.GV_SVARV&&window.gvLathe&&(k==='3d'||k==='2d'))on=(k==='3d')===!!gvLathe.v3;else if(window.GV_SVARV&&window.gvLathe&&k==='cut')on=!!gvLathe.cut;else if(k==='3d')on=stockMode;else if(k==='2d')on=!stockMode&&!mode3D;else if(k==='rot')on=rot;else if(k==='cut')on=cut;else if(k==='path')on=pathOnly;
+  if(['top','front'].includes(k))dis=!webOn();if(k==='cut'||k==='path')dis=!stockMode&&!(window.GV_SVARV&&k==='cut');
   b.setAttribute('aria-pressed',on);b.disabled=dis;});}
 const cutPlane=window.THREE?new THREE.Plane(new THREE.Vector3(0,0,-1),0):null;
 function applyCut(){if(!webgl||!cutPlane)return;webgl.renderer.localClippingEnabled=true;
@@ -7230,6 +7230,7 @@ function view(dir){if(!webgl)return;const c=webgl.controls,t=c.target.clone(),d=
   if(dir==='top')webgl.camera.position.set(t.x,t.y+d,t.z+0.001);else webgl.camera.position.set(t.x,t.y+d*0.28,t.z+d*0.96);c.update();}
 cam.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;const k=b.dataset.cam;
   if(window.GV_SVARV&&window.gvLathe&&(k==='3d'||k==='2d')){gvLathe.v3=k==='3d';camState();drawFromText(false);return;}
+  if(window.GV_SVARV&&window.gvLathe&&k==='cut'){gvLathe.setCut(!gvLathe.cut);if(!gvLathe.v3)gvLathe.v3=true;camState();drawFromText(false);return;}
   if(k==='3d'){if(!stockMode)$('cncFrasBtn').click();}
   else if(k==='2d'&&webOn()){if(stockMode)$('cncFrasBtn').click();if(mode3D){const c=$('toggle3D');c.checked=false;c.dispatchEvent(new Event('change',{bubbles:true}));}}
   else if(k==='top'||k==='front')view(k);
@@ -7684,7 +7685,7 @@ const $=id=>document.getElementById(id);
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const nf=v=>{v=Math.round(v*1000)/1000;return String(v).replace('.',',');};
 const kSrc=li=>(ta.value.split(/\r?\n/)[li]||'').replace(/\(.*?\)/g,'').replace(/;.*$/,'').toUpperCase();
-const kfmt=p=>`X${nf(p[0])} Y${nf(p[1])}`;
+const kfmt=p=>window.GV_SVARV?`Z${nf(p[0])} X${nf(2*p[1])}`:`X${nf(p[0])} Y${nf(p[1])}`;
 let R=null;   // banan i samma form som Spånlex kontroll läser
 function buildR(){const els=[];(paths||[]).forEach(s=>{if(s.type==='tilt'||s.skipMotion||!s.pts||!s.pts.length)return;const a=s.pts[0],b=s.pts[s.pts.length-1];
   els.push({xy:true,p0:[a.x,a.y,a.z||0],p1:[b.x,b.y,b.z||0],k:(s.type===2||s.type===3)?'A':'L',rapid:s.type===0,c:s.center?[s.center.x,s.center.y]:null,cw:s.type===2,li:(s.line||1)-1,f:s.feedMmPerMin});});
@@ -8274,7 +8275,7 @@ function kSegsFrom(ps,top){const out=[],T=top==null?0:top;
  /* samma hål flera gånger (till exempel G83 med flera steg) räknas en gång */
  const v=[];return out.filter(e=>{if(!e.v)return true;const d=v.find(h=>Math.abs(h.a[0]-e.a[0])<1e-3&&Math.abs(h.a[1]-e.a[1])<1e-3);if(d){if(e.a[2]<d.a[2]){d.a=d.b=e.a;}return false;}v.push(e);return true;});}
 const kZ=v=>String(Math.round(v*100)/100).replace('.',',').replace('-','−');
-function kDesc(e){const P=p=>`X${nf(p[0])} Y${nf(p[1])}`;
+function kDesc(e){const P=p=>window.GV_SVARV?`Z${nf(p[0])} X${nf(2*p[1])}`:`X${nf(p[0])} Y${nf(p[1])}`;
  if(e.v)return `i ${P(e.a)} ned till Z${kZ(e.a[2])}`;
  if(Math.abs(e.a[2]-e.b[2])<1e-3)return `från ${P(e.a)} till ${P(e.b)}`+(Math.abs(e.a[2])>1e-3?` på Z${kZ(e.a[2])}`:'');
  return `från ${P(e.a)} Z${kZ(e.a[2])} till ${P(e.b)} Z${kZ(e.b[2])}`;}
@@ -8294,7 +8295,7 @@ function kEvalMatch(L,ps){const E=.05,T=L.segs||[],S=kSegsFrom(ps||paths,L.top),
  const mu=ps?null:kMust(L);if(m===n&&!extra.length&&mu)return {score:90,ok:false,msgs:[{k:'ok',t:'Banan följer ritningen.'},{k:'err',t:mu}]};
  if(m===n&&!extra.length){msgs.push({k:'ok',t:'Banan följer ritningen.'});if(rev)msgs.push({k:'tip',t:`Rad ${rev.li+1} går åt andra hållet jämfört med lärarens bana.`});return {score:100,ok:true,msgs};}
  if(m)msgs.push({k:'ok',t:`${m} av ${n} delar stämmer.`});
- const x=extra[0];if(x&&miss&&x.arc&&miss.arc&&kE3(x.a,miss.a,E)&&kE3(x.b,miss.b,E)){msgs.push({k:'err',t:`Rad ${x.li+1} går till rätt punkt, men bågen ser inte ut som på ritningen. Kontrollera G02 eller G03 och radien eller I och J.`});return {score,ok:false,msgs};}
+ const x=extra[0];if(x&&miss&&x.arc&&miss.arc&&kE3(x.a,miss.a,E)&&kE3(x.b,miss.b,E)){msgs.push({k:'err',t:`Rad ${x.li+1} går till rätt punkt, men bågen ser inte ut som på ritningen. Kontrollera G02 eller G03 och radien eller I och ${window.GV_SVARV?'K':'J'}.`});return {score,ok:false,msgs};}
  if(x)msgs.push({k:'err',t:`Rad ${x.li+1} skär ${kDesc(x)}, men det finns inte på ritningen.`});
  if(miss)msgs.push({k:extra.length?'tip':'err',t:`Det saknas en ${kWhat(miss)} ${kDesc(miss)}.`});
  return {score,ok:false,msgs};}
@@ -8402,7 +8403,7 @@ function kOverlay(){if(!kursOn||stockMode||mode3D)return;const c=ctx;c.save();
  if(kHoles){c.strokeStyle='#ffd666';c.lineWidth=2;c.setLineDash([5,4]);kHoles.forEach(h=>{const q=S(h),rr=3*view.scale;c.beginPath();c.arc(q.x,q.y,rr,0,Math.PI*2);c.stroke();c.beginPath();c.moveTo(q.x-rr-5,q.y);c.lineTo(q.x+rr+5,q.y);c.moveTo(q.x,q.y-rr-5);c.lineTo(q.x,q.y+rr+5);c.stroke();});c.setLineDash([]);}
  c.restore();}
 /* exempelkoden på engelska: kommentarerna översätts och rubriken får lektionens engelska namn */
-function kEN(s,L){if(!window.cncCodeEN||!window.cncI18n||cncI18n.lang!=='en')return s;let x=cncCodeEN(s);const t=cncI18n.tr(L.t).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[’']/g,'').toUpperCase();return x.replace(/^\(COURSE (\d+) · LESSON (\d+)(?:: [^)]*)?\)/,(m,k,l)=>'(COURSE '+k+' · LESSON '+l+': '+t+')');}
+function kEN(s,L){if(!window.cncCodeEN||!window.cncI18n||cncI18n.lang!=='en')return s;let x=cncCodeEN(s);const t=cncI18n.tr(L.t).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[’']/g,'').toUpperCase();return x.replace(/^\((LATHE )?COURSE (\d+) · LESSON (\d+)(?:: [^)]*)?\)/,(m,lt,k,l)=>'('+(lt||'')+'COURSE '+k+' · LESSON '+l+': '+t+')');}
 function kLoad(i){kLi=Math.max(0,Math.min(KC().lessons.length-1,i));kp().cur=kLi;kpSave();kOk=false;kShowHint=false;kRes=null;kTries=0;kShown=false;const L=KL();
  document.documentElement.classList.toggle('k-blind',!!L.blind);
  if(L.type==='match'&&!L.segs&&L.solution){try{L.segs=kSegsFrom(parseGcode(L.solution).paths,L.top);}catch(e){L.segs=[];}}
@@ -8412,16 +8413,23 @@ function kLoad(i){kLi=Math.max(0,Math.min(KC().lessons.length-1,i));kp().cur=kLi
  // lektioner med egna nollpunkter (G55 …): lägg in dem, och återställ annars
  if(typeof wcsTable!=='undefined'){if(kWcs==null)kWcs=JSON.parse(JSON.stringify(wcsTable));wcsTable.splice(0,wcsTable.length,...JSON.parse(JSON.stringify(kWcs)));if(L.wcs)Object.entries(L.wcs).forEach(([k,v])=>{const w=wcsTable[+k-1];if(w){w.x=v.x||0;w.y=v.y||0;w.z=v.z||0;}});}kHoles=L.type==='drill'?L.holes:null;if(KM){kTargets=KM.ch;kHoles=KM.holes.length?KM.holes:null;}
  const cur=typeof L.cur==='function'?L.cur():null;loadTextIntoEditor(cur!=null?(L.setup||'')+cur:kEN(L.start,L));kView();window.render();kRenderTop();kRenderCard();kRenderBar();ta.focus();const n=ta.value.length;ta.setSelectionRange(n,n);kAfterDraw();}
-function kursStart(i,c){if(window.GV_SVARV&&window.gvLathe)gvLathe.setMode(false);kC=c!=null?c:(KP.lastC||0);if(!KURSER[kC])kC=0;KP.lastC=kC;if(i==null)i=kp().cur||0;
- if(!kursOn){kSaved={code:ta.value,dialect:window.RITA_DIALECT,stock:stockMode,m3:mode3D,setup:KC().custom&&window.gvSetupLine?gvSetupLine():''};try{localStorage.setItem('rita-kurs-backup',JSON.stringify(kSaved));}catch(e){}
+/* svarvkurser (maskin:'svarv') körs i svarvläget, fräskurserna i fräsläget. Kursen byter läge själv och byter tillbaka när den är slut. */
+const kSv=K=>!!K&&K.maskin==='svarv';
+function kursStart(i,c){if(c==null){c=KP.lastC||0;if(KURSER[c]&&kSv(KURSER[c])!==!!window.GV_SVARV){const f=KURSER.findIndex(K=>kSv(K)===!!window.GV_SVARV);if(f>=0){c=f;i=null;}}}
+ kC=c;if(!KURSER[kC])kC=0;KP.lastC=kC;if(i==null)i=kp().cur||0;const sv=kSv(KC());
+ if(!kursOn){kSaved={code:ta.value,svarv:!!window.GV_SVARV,dialect:window.RITA_DIALECT,stock:stockMode,m3:mode3D,setup:KC().custom&&window.gvSetupLine?gvSetupLine():''};try{localStorage.setItem('rita-kurs-backup',JSON.stringify(kSaved));}catch(e){}}
+ if(window.gvLathe&&!!window.GV_SVARV!==sv)gvLathe.setMode(sv,{keepKurs:true,nosave:kursOn});
+ if(window.gvLathe&&gvLathe.kurs)gvLathe.kurs(sv);
+ if(!kursOn){
   kursOn=true;document.documentElement.classList.add('rt-kurs');kTop.hidden=kCard.hidden=kBar.hidden=false;
   if(stockMode)$('cncFrasBtn').click();if(mode3D){const t=$('toggle3D');t.checked=false;t.dispatchEvent(new Event('change',{bubbles:true}));}
-  const dl=KC().dialect||'fanuc';if(window.RITA_DIALECT!==dl&&window.ritaSetDialect)window.ritaSetDialect(dl,true);dispatchEvent(new Event('resize'));}
+  const dl=KC().dialect||'fanuc';if(!sv&&window.RITA_DIALECT!==dl&&window.ritaSetDialect)window.ritaSetDialect(dl,true);dispatchEvent(new Event('resize'));}
  kLoad(i);if(KC().intro&&!kp().intro){kp().intro=1;kpSave();setTimeout(()=>kIntro(true),60);}}
 function kursEnd(){if(!kursOn)return;kursOn=false;document.documentElement.classList.remove('k-blind');if(kWcs&&typeof wcsTable!=='undefined'){wcsTable.splice(0,wcsTable.length,...kWcs);kWcs=null;}document.documentElement.classList.remove('rt-kurs');kTop.hidden=kCard.hidden=kBar.hidden=true;kTarget=kHoles=null;
- const s=kSaved;kSaved=null;if(s){if(s.dialect&&window.ritaSetDialect)window.ritaSetDialect(s.dialect,true);loadTextIntoEditor((s.setup||'')+s.code);if(s.stock&&!stockMode)$('cncFrasBtn').click();}
+ const s=kSaved;kSaved=null;if(window.gvLathe&&gvLathe.kurs)gvLathe.kurs(false);
+ if(s){if(window.gvLathe&&s.svarv!=null&&!!window.GV_SVARV!==s.svarv)gvLathe.setMode(s.svarv,{keepKurs:true,nosave:true});if(s.dialect&&window.ritaSetDialect)window.ritaSetDialect(s.dialect,true);loadTextIntoEditor((s.setup||'')+s.code);if(s.stock&&!stockMode)$('cncFrasBtn').click();}
  try{localStorage.removeItem('rita-kurs-backup');}catch(e){}dispatchEvent(new Event('resize'));msg('Kursen är avslutad, ditt program är tillbaka.');}
-window.ritaKursMenu=function(){const out=[];KURSER.forEach((K,c)=>{const p=c===0?KP:((KP.c&&KP.c[K.id])||{done:[],cur:0});out.push({l:K.name,sub:K.lessons.map((l,i)=>({l:`${i+1}. ${l.t}${p.done.includes(i)?'  ✓':''}`,a:()=>kursStart(i,c)})).concat([{sep:1},{l:'Fortsätt där jag slutade',a:()=>kursStart(p.cur||0,c)}])});});
+window.ritaKursMenu=function(){const out=[];KURSER.forEach((K,c)=>{if(kSv(K)!==!!window.GV_SVARV)return;const p=c===0?KP:((KP.c&&KP.c[K.id])||{done:[],cur:0});out.push({l:K.name,sub:K.lessons.map((l,i)=>({l:`${i+1}. ${l.t}${p.done.includes(i)?'  ✓':''}`,a:()=>kursStart(i,c)})).concat([{sep:1},{l:'Fortsätt där jag slutade',a:()=>kursStart(p.cur||0,c)}])});});
  return out.concat([{sep:1},{l:'Fortsätt där jag slutade',a:()=>kursStart(null,null)}],kursOn?[{l:'Avsluta kursen',a:()=>kursEnd()}]:[]);};
 addEventListener('gv-vy-storlek',()=>{if(kursOn&&!stockMode&&!mode3D){kView();window.render();}});
 /* egna kurser, till exempel uppgifter från en lärare. grade rättar kod utan att röra kodfältet. */

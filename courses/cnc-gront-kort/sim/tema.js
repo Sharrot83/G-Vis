@@ -23,7 +23,8 @@ function lab(){document.querySelectorAll('.sim-tema').forEach(b=>{b.textContent=
 window.simTema={light,set,on:f=>{fns.push(f);try{f(light());}catch(e){}},
   bg(scene,dark,lightCol){if(!scene||!window.THREE)return;const ap=l=>{const c=new THREE.Color(l?lightCol:dark);scene.background=c;if(scene.fog)scene.fog.color=c.clone();};window.simTema.on(ap);}};
 /* knappen läggs bredvid varje Lexikon-länk */
-function boot(){document.querySelectorAll('a[href*="lexikon.html"]').forEach(a=>{if(a.nextElementSibling&&a.nextElementSibling.classList.contains('sim-tema'))return;
+const isLex=a=>{try{return /\/lexikon(\.html)?$/.test(new URL(a.href,location.href).pathname);}catch(_){return false;}};   // Netlify: /lexikon utan .html
+function boot(){[...document.querySelectorAll('a[href*="lexikon"]')].filter(isLex).forEach(a=>{if(a.nextElementSibling&&a.nextElementSibling.classList.contains('sim-tema'))return;
   const b=document.createElement('button');b.type='button';b.className=a.className+' sim-tema';b.style.cssText=(a.getAttribute('style')||'');
   const cs=getComputedStyle(a);b.style.fontSize=cs.fontSize;b.style.fontFamily=cs.fontFamily;b.style.letterSpacing=cs.letterSpacing;b.style.textTransform=cs.textTransform;b.style.fontWeight=cs.fontWeight;
   b.addEventListener('click',()=>set(light()?'dark':'light'));a.after(b);});lab();}
