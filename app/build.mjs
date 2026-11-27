@@ -13,6 +13,7 @@ const copy = (rel) => {
 };
 [
   'courses/cnc-gront-kort/g-vis.html',
+  'courses/cnc-gront-kort/g-vis-svarv.js',
   'courses/cnc-gront-kort/lexikon.html',
   'courses/cnc-gront-kort/i18n',
   'courses/cnc-gront-kort/sim',

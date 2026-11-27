@@ -3,6 +3,8 @@
 <head>
 <script src="i18n/i18n.js"></script>
 <script src="i18n/en-gvis.js"></script>
+<script src="i18n/en-svarv.js"></script>
+<script src="g-vis-svarv.js"></script>
 <script src="i18n/en-fysik.js"></script>
 <script src="i18n/en-kod.js"></script>
 <script src="i18n/en-kurser.js"></script>
@@ -659,7 +661,27 @@
   html[data-theme="light"] .rt-bar button.primary { color:#fff; }
   html[data-theme="light"] .example-menu button:hover { background:#e3e9f0; }
   html[data-theme="light"] .ed-tl-bar button.cur { box-shadow:0 0 0 2px #1d2329; }
-  html[data-theme="light"] .rt-view, html[data-theme="light"] .code-editor, html[data-theme="light"] .ph-brk {
+  html[data-theme="light"] .right { background:#f4f6f8; }
+  html[data-theme="light"] .code-editor { background:#ffffff; }
+  html[data-theme="light"] .line-numbers { background:#f1f4f7; color:#7b8794; }
+  html[data-theme="light"] .code-highlight { color:#1f2328; }
+  html[data-theme="light"] .code-input { caret-color:#1f2328; }
+  html[data-theme="light"] .tok-g { color:#9a5b00; }
+  html[data-theme="light"] .tok-axis { color:#0b62a8; }
+  html[data-theme="light"] .tok-num { color:#1f2328; }
+  html[data-theme="light"] .tok-feed { color:#237a2e; }
+  html[data-theme="light"] .tok-comment { color:#6a737d; }
+  html[data-theme="light"] .tok-other { color:#7d3aa8; }
+  html[data-theme="light"] .line-highlight { background:rgba(31,111,209,.12); }
+  /* svarvläget: dölj det som bara hör till fräsen */
+  html.gv-svarv .rt-grp:has(#rtDialect), html.gv-svarv .rt-homegrp, html.gv-svarv .sim-cam button:not([data-cam="3d"]):not([data-cam="2d"]) { display:none; }
+  .gvl-amne label { display:flex; flex-direction:column; gap:3px; font-size:12px; color:var(--muted); margin:0 0 10px; }
+  .gvl-amne input, .gvl-amne select { font:13px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; padding:6px 8px; border:1.5px solid var(--border); border-radius:6px; background:var(--panel2); color:var(--text); }
+  .gvl-tab { border-collapse:collapse; width:100%; font-size:13px; } .gvl-tab td, .gvl-tab th { text-align:left; padding:5px 6px; border-bottom:1px solid var(--border); } .gvl-tab td:first-child { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  html[data-theme="light"] .sim-hud, html[data-theme="light"] .sim-cam, html[data-theme="light"] .overlay, html[data-theme="light"] .coord-readout { background:rgba(255,255,255,.92); color:#1d2329; border-color:#c9d2db; }
+  html[data-theme="light"] .sim-hud span { color:#4b5560; }
+  html[data-theme="light"] .sim-cam button { color:#1d2329; border-right-color:#c9d2db; }
+  html[data-theme="light"] .ph-brk {
     --bg:#101318; --panel:#181d24; --panel2:#202732; --text:#eef3f8; --muted:#9aa7b5; --border:#303a47; --accent:#4da3ff; color-scheme:dark; color:var(--text); }
 
   /* ---------- verktygsmagasinet (som Spånlex) ---------- */
@@ -1646,7 +1668,7 @@ function ensureWebGL() {
   host.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x2b3137);
+  scene.background = new THREE.Color(document.documentElement.getAttribute('data-theme')==='light'?0xdfe4e9:0x2b3137);
 
   const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 10000);
   camera.position.set(90, 100, 130);
@@ -2309,6 +2331,21 @@ function showWebGL(show) {
 window.addEventListener('resize', () => { if (stockMode || mode3D) resizeWebGL(); });
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
+/* ljust läge: 2D-vyn ritas med mörka färger, så de vänds här (ljushet 1−L, samma kulör) */
+(function(){const P=CanvasRenderingContext2D.prototype,nc=document.createElement('canvas').getContext('2d'),memo=new Map();
+  const light=()=>document.documentElement.getAttribute('data-theme')==='light';
+  function inv(c){if(typeof c!=='string'||!light())return c;let r=memo.get(c);if(r)return r;
+    nc.fillStyle='#000';nc.fillStyle=c;const v=nc.fillStyle;let R,G,B,A=1,m;
+    if(v[0]==='#'){R=parseInt(v.slice(1,3),16);G=parseInt(v.slice(3,5),16);B=parseInt(v.slice(5,7),16);}
+    else if((m=v.match(/rgba?\(([^)]+)\)/))){const q=m[1].split(',').map(Number);[R,G,B]=q;if(q.length>3)A=q[3];}else{memo.set(c,c);return c;}
+    R/=255;G/=255;B/=255;const mx=Math.max(R,G,B),mn=Math.min(R,G,B);let h=0,sa=0,l=(mx+mn)/2;
+    if(mx!==mn){const d=mx-mn;sa=l>.5?d/(2-mx-mn):d/(mx+mn);h=mx===R?(G-B)/d+(G<B?6:0):mx===G?(B-R)/d+2:(R-G)/d+4;h/=6;}
+    l=1-l;if(sa>.35)l=Math.min(l,.42);
+    const f=(p,q,t)=>{t=(t+1)%1;return t<1/6?p+(q-p)*6*t:t<.5?q:t<2/3?p+(q-p)*(2/3-t)*6:p;};
+    let r2=l,g2=l,b2=l;if(sa){const q=l<.5?l*(1+sa):l+sa-l*sa,p=2*l-q;r2=f(p,q,h+1/3);g2=f(p,q,h);b2=f(p,q,h-1/3);}
+    r='rgba('+Math.round(r2*255)+','+Math.round(g2*255)+','+Math.round(b2*255)+','+A+')';memo.set(c,r);return r;}
+  ['strokeStyle','fillStyle','shadowColor'].forEach(k=>{const d=Object.getOwnPropertyDescriptor(P,k);
+    Object.defineProperty(ctx,k,{configurable:true,get(){return d.get.call(this);},set(v){d.set.call(this,inv(v));}});});})();
 const ta = document.getElementById('gcode');
 const statusEl = document.getElementById('status');
 const warnIndicator = document.getElementById('warnIndicator');
@@ -3704,6 +3741,7 @@ function applyCutterCompensation(segments, warnings, cautions) {
 }
 
 function parseGcode(text) {
+  if (window.GV_SVARV && window.gvLathe) return gvLathe.parse(text);
   const result=[];
   const warnings=[];
   const cautions=[]; // yellow: things that work but sit right at a limit
@@ -4838,7 +4876,7 @@ function drawGrid() {
   for(let y=yStart;y<=worldTop;y+=spacing){
     const sy=screen({x:0,y}).y;
     ctx.beginPath(); ctx.moveTo(0,sy); ctx.lineTo(rect.width,sy); ctx.stroke();
-    ctx.fillText(y.toFixed(0),4,sy-3);
+    ctx.fillText(window.GV_SVARV?(y===0?'0':'Ø'+(Math.abs(y)*2).toFixed(0)):y.toFixed(0),4,sy-3);
   }
 
   const o=screen({x:0,y:0});
@@ -4919,6 +4957,7 @@ function midpointOf(pts) {
 }
 
 function drawToolMarkerRaw(p, T) {
+  if (window.GV_SVARV && window.gvLathe) return gvLathe.marker(ctx, p, T, view.scale);
   const tool = toolByNumber(T);
   if (tool && Number.isFinite(tool.d)) {
     const r = Math.max(1, (tool.d/2) * view.scale);
@@ -4949,7 +4988,9 @@ function render(playPos, forceStockRebuild=true) {
     updateWebGLToolMarker(playPos);
     return;
   }
+  if (window.GV_SVARV && window.gvLathe) { if (gvLathe.v3) { gvLathe.show3D(true); gvLathe.update3D(playPos); return; } gvLathe.show3D(false); }
   if (mode3D) drawGridIso(); else drawGrid();
+  if (window.GV_SVARV && window.gvLathe && !mode3D) { try { gvLathe.draw2D(ctx, screen, view.scale, playPos); } catch(e) { console.error('svarv', e); } }
   const showCenters = toggleCenters.checked;
   const showGM = toggleGM.checked;
   const showAxis = toggleAxis.checked;
@@ -5556,7 +5597,7 @@ window.addEventListener('mousemove',e=>{
   const rect=canvas.getBoundingClientRect();
   if (e.clientX>=rect.left && e.clientX<=rect.right && e.clientY>=rect.top && e.clientY<=rect.bottom) {
     const wp = worldFromScreen(e.clientX-rect.left, e.clientY-rect.top);
-    coordReadout.textContent = 'X '+wp.x.toFixed(1)+' · Y '+wp.y.toFixed(1);
+    coordReadout.textContent = window.GV_SVARV ? 'Z '+wp.x.toFixed(1)+' · X Ø'+(Math.abs(wp.y)*2).toFixed(1) : 'X '+wp.x.toFixed(1)+' · Y '+wp.y.toFixed(1);
   }
   if(!dragging) return;
   view.offsetX += e.clientX-lastMouse.x;
@@ -6979,7 +7020,7 @@ const click=id=>()=>{const b=$(id);if(b)b.click();};
 const lex=h=>()=>window.ritaLex?window.ritaLex(h):window.open('lexikon.html#'+h,'_blank');
 const chkBox=id=>({c:()=>{const e=$(id);return !!(e&&e.checked);},a:()=>{const e=$(id);if(!e)return;e.checked=!e.checked;e.dispatchEvent(new Event('change',{bubbles:true}));}});
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function examples(){const bs=[...document.querySelectorAll('#exampleMenu button')];if(bs.length){const cats=[];bs.forEach(b=>{const c=b.dataset.cat||'Exempel';let g=cats.find(x=>x.l===c);if(!g){g={l:c,sub:[]};cats.push(g);}g.sub.push({l:b.textContent.trim(),a:()=>b.click()});});return cats;}
+function examples(){if(window.GV_SVARV&&window.gvLathe)return gvLathe.examples();const bs=[...document.querySelectorAll('#exampleMenu button')];if(bs.length){const cats=[];bs.forEach(b=>{const c=b.dataset.cat||'Exempel';let g=cats.find(x=>x.l===c);if(!g){g={l:c,sub:[]};cats.push(g);}g.sub.push({l:b.textContent.trim(),a:()=>b.click()});});return cats;}
   return bs.length?bs.map(b=>({l:b.textContent.trim(),a:()=>b.click()})):[{l:'Inga exempel',dis:true}];}
 function menus(){const L=[
  {t:'Arkiv',i:[{l:'Öppna',k:'Ctrl+O',a:click('openBtn')},{l:'Spara',k:'Ctrl+S',a:click('saveBtn')},{l:'Spara .gvis …',k:'Ctrl+Shift+S',a:()=>window.gvFile&&gvFile.saveGvis()},{l:'Spara .nc …',k:'Ctrl+Alt+S',a:()=>window.gvFile&&gvFile.saveNc()},{sep:1},
@@ -7039,7 +7080,7 @@ document.addEventListener('keydown',e=>{if(!(e.ctrlKey||e.metaKey)||e.altKey)ret
   else if(e.key==='Enter'){e.preventDefault();click('drawBtn')();}});
 // filnamn/status till höger i menyraden: antal rader och segment
 const info=$('rtMbInfo'),seg=$('segments'),ta=$('gcode');
-function upd(){const n=ta?ta.value.split('\n').length:0;info.innerHTML='<span id="rtFileName">'+(window.gvFileLabel?gvFileLabel():'program.nc')+'</span><span>'+(window.ritaDialectName?window.ritaDialectName():'Fanuc')+'</span><span>'+n+' rader</span><span><b>'+(seg?seg.textContent:'0')+'</b> segment</span>';}
+function upd(){const n=ta?ta.value.split('\n').length:0;info.innerHTML='<span id="rtFileName">'+(window.gvFileLabel?gvFileLabel():'program.nc')+'</span><span>'+(window.GV_SVARV?'Hass svarv':window.ritaDialectName?window.ritaDialectName():'Fanuc')+'</span><span>'+n+' rader</span><span><b>'+(seg?seg.textContent:'0')+'</b> segment</span>';}
 if(ta)ta.addEventListener('input',()=>setTimeout(upd,400));if(seg)new MutationObserver(upd).observe(seg,{childList:true,characterData:true,subtree:true});upd();
 })();
 </script>
@@ -7076,6 +7117,7 @@ function stateAt(li){const L=ta.value.split('\n');let abs=true,cyc=false,tool=nu
   return {abs,cyc,tool:tool!=null?tool:pending};}
 function explain(li,force){
   const L=ta.value.split('\n');li=Math.max(0,Math.min(L.length-1,li));const raw=L[li]||'';if(!force&&exLine===li&&exRaw===raw)return;exLine=li;exRaw=raw;
+  if(window.GV_SVARV&&window.gvLathe){$('rtExplain').innerHTML=gvLathe.explain(raw,li);return;}
   const b=parseLine(raw),ls=stateAt(li),rows=[];let guide=null;
   b.G.forEach(g=>{const k=Math.round(g);if(iso()&&k===17&&b.W.T!==undefined){rows.push(['G17','Verktygsanrop i ISO: byter till verktyget T'+b.W.T+' (som T'+b.W.T+' M06 i Fanuc). Verktygets längd och radie tas från verktygsdefinitionen G99.']);return;}const isoT=iso()&&DICT_ISO[k]&&!(k===99&&b.W.T===undefined);rows.push(['G'+String(g).padStart(2,'0'),isoT?DICT_ISO[k]:(DICT_G[g]||DICT_G[k]||'Okänd G-kod.')]);if(guide===null&&GUIDE[k])guide=GUIDE[k];});
   b.M.forEach(x=>rows.push(['M'+String(x).padStart(2,'0'),DICT_M[x]||'M-kod som inte påverkar simuleringen.']));
@@ -7134,12 +7176,12 @@ function timeOf(pos){if(!pos||!playModel)return playModel?playModel.totalTime:0;
 function hud(pos){
   const el=$('rtHud');if(!paths||!paths.length){el.hidden=true;return;}el.hidden=false;
   let si,pt;if(pos&&pos.point){si=pos.segIndex;pt=pos.point;}else{si=paths.length-1;const sg=paths[si];pt=sg.pts[sg.pts.length-1]||{x:0,y:0,z:0};}
-  const sg=paths[si],T=toolByNumber(sg.T);
+  const sg=paths[si],T=(window.GV_SVARV&&window.gvLathe)?gvLathe.tool(sg.T):toolByNumber(sg.T);
   $('rtHudT').textContent=T?T.name:(sg.T!=null?'T'+sg.T:'Inget verktyg');
   $('rtHudL').textContent='Rad '+sg.line+': '+lineText(sg.line);
   const z=pt.z||0,F=sg.type===0?'F–':'F'+Math.round(sg.feedMmPerMin||0);
   const fx=v=>(Math.abs(v)<0.005?0:v).toFixed(2);
-  $('rtHudP').textContent='X'+fx(pt.x)+' Y'+fx(pt.y)+' Z'+fx(z)+' · S'+(sg.S||0)+' '+F+' T'+(sg.T??'–');
+  if(window.GV_SVARV&&window.gvLathe)$('rtHudP').textContent=gvLathe.hud(pt,sg);else $('rtHudP').textContent='X'+fx(pt.x)+' Y'+fx(pt.y)+' Z'+fx(z)+' · S'+(sg.S||0)+' '+F+' T'+(sg.T??'–');
   tlProgress(timeOf(pos));
 }
 const _render=render;
@@ -7151,7 +7193,7 @@ drawFromText=function(){const r=_draw.apply(this,arguments);try{tlBuild();hud(nu
 const cam=$('rtCam');let rot=false,cut=false,pathOnly=false;
 function webOn(){return typeof stockMode!=='undefined'&&(stockMode||mode3D);}
 function camState(){cam.querySelectorAll('button[data-cam]').forEach(b=>{const k=b.dataset.cam;let on=false,dis=false;
-  if(k==='3d')on=stockMode;else if(k==='2d')on=!stockMode&&!mode3D;else if(k==='rot')on=rot;else if(k==='cut')on=cut;else if(k==='path')on=pathOnly;
+  if(window.GV_SVARV&&window.gvLathe&&(k==='3d'||k==='2d'))on=(k==='3d')===!!gvLathe.v3;else if(k==='3d')on=stockMode;else if(k==='2d')on=!stockMode&&!mode3D;else if(k==='rot')on=rot;else if(k==='cut')on=cut;else if(k==='path')on=pathOnly;
   if(['top','front'].includes(k))dis=!webOn();if(k==='cut'||k==='path')dis=!stockMode;
   b.setAttribute('aria-pressed',on);b.disabled=dis;});}
 const cutPlane=window.THREE?new THREE.Plane(new THREE.Vector3(0,0,-1),0):null;
@@ -7187,6 +7229,7 @@ window.ritaPathOnly=()=>pathOnly;
 function view(dir){if(!webgl)return;const c=webgl.controls,t=c.target.clone(),d=webgl.camera.position.distanceTo(t);
   if(dir==='top')webgl.camera.position.set(t.x,t.y+d,t.z+0.001);else webgl.camera.position.set(t.x,t.y+d*0.28,t.z+d*0.96);c.update();}
 cam.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;const k=b.dataset.cam;
+  if(window.GV_SVARV&&window.gvLathe&&(k==='3d'||k==='2d')){gvLathe.v3=k==='3d';camState();drawFromText(false);return;}
   if(k==='3d'){if(!stockMode)$('cncFrasBtn').click();}
   else if(k==='2d'&&webOn()){if(stockMode)$('cncFrasBtn').click();if(mode3D){const c=$('toggle3D');c.checked=false;c.dispatchEvent(new Event('change',{bubbles:true}));}}
   else if(k==='top'||k==='front')view(k);
@@ -7218,7 +7261,9 @@ setTimeout(()=>{try{tlBuild();hud(null);explain(caretLine(),true);dispatchEvent(
 (function(){const b=document.getElementById('rtTheme');
 function lab(){const d=document.documentElement.getAttribute('data-theme')!=='light';b.textContent=d?'☀ Ljust läge':'☾ Mörkt läge';b.setAttribute('aria-pressed',d?'false':'true');}
 b.addEventListener('click',()=>{const t=document.documentElement.getAttribute('data-theme')==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem('cnc-tema',t);}catch(e){}lab();
-  try{const f=document.getElementById('rtLexFrame');if(f&&f.contentDocument)f.contentDocument.documentElement.setAttribute('data-theme',t);}catch(e){}});
+  try{const f=document.getElementById('rtLexFrame');if(f&&f.contentDocument)f.contentDocument.documentElement.setAttribute('data-theme',t);}catch(e){}
+  try{if(webgl)webgl.scene.background=new THREE.Color(t==='light'?0xdfe4e9:0x2b3137);}catch(e){}
+  try{dispatchEvent(new Event('resize'));}catch(e){}});
 lab();})();
 </script>
 
@@ -8367,7 +8412,7 @@ function kLoad(i){kLi=Math.max(0,Math.min(KC().lessons.length-1,i));kp().cur=kLi
  // lektioner med egna nollpunkter (G55 …): lägg in dem, och återställ annars
  if(typeof wcsTable!=='undefined'){if(kWcs==null)kWcs=JSON.parse(JSON.stringify(wcsTable));wcsTable.splice(0,wcsTable.length,...JSON.parse(JSON.stringify(kWcs)));if(L.wcs)Object.entries(L.wcs).forEach(([k,v])=>{const w=wcsTable[+k-1];if(w){w.x=v.x||0;w.y=v.y||0;w.z=v.z||0;}});}kHoles=L.type==='drill'?L.holes:null;if(KM){kTargets=KM.ch;kHoles=KM.holes.length?KM.holes:null;}
  const cur=typeof L.cur==='function'?L.cur():null;loadTextIntoEditor(cur!=null?(L.setup||'')+cur:kEN(L.start,L));kView();window.render();kRenderTop();kRenderCard();kRenderBar();ta.focus();const n=ta.value.length;ta.setSelectionRange(n,n);kAfterDraw();}
-function kursStart(i,c){kC=c!=null?c:(KP.lastC||0);if(!KURSER[kC])kC=0;KP.lastC=kC;if(i==null)i=kp().cur||0;
+function kursStart(i,c){if(window.GV_SVARV&&window.gvLathe)gvLathe.setMode(false);kC=c!=null?c:(KP.lastC||0);if(!KURSER[kC])kC=0;KP.lastC=kC;if(i==null)i=kp().cur||0;
  if(!kursOn){kSaved={code:ta.value,dialect:window.RITA_DIALECT,stock:stockMode,m3:mode3D,setup:KC().custom&&window.gvSetupLine?gvSetupLine():''};try{localStorage.setItem('rita-kurs-backup',JSON.stringify(kSaved));}catch(e){}
   kursOn=true;document.documentElement.classList.add('rt-kurs');kTop.hidden=kCard.hidden=kBar.hidden=false;
   if(stockMode)$('cncFrasBtn').click();if(mode3D){const t=$('toggle3D');t.checked=false;t.dispatchEvent(new Event('change',{bubbles:true}));}
@@ -8478,7 +8523,7 @@ function drawWarn(){const box=$('inspWarn');const items=[...document.querySelect
 function usedTools(){const m=new Map();(paths||[]).forEach(s=>{if(s.T==null||s.type==='tilt')return;const u=m.get(s.T)||{lines:new Set(),cut:0};u.lines.add(s.line);if(s.type!==0&&s.pts)u.cut+=s._len||0;m.set(s.T,u);});
   ta.value.split('\n').forEach((l,i)=>{const t=l.replace(/\(.*?\)/g,'').replace(/;.*/,'').toUpperCase().match(/T\s*(\d+)/);if(t){const n=+t[1];const u=m.get(n)||{lines:new Set(),cut:0};u.lines.add(i+1);m.set(n,u);}});
   return [...m.entries()].sort((a,b)=>a[0]-b[0]);}
-function drawTools(){const box=$('inspTools'),list=usedTools();
+function drawTools(){const box=$('inspTools');if(window.GV_SVARV&&window.gvLathe)return gvLathe.toolsUI(box);const list=usedTools();
   if(!list.length){box.innerHTML='<p class="insp-ok">Programmet anropar inga verktyg. Skriv till exempel <code>T1 M06</code>.</p>';return;}
   box.innerHTML=list.map(([n,u])=>{const t=toolByNumber(n),ln=[...u.lines].sort((a,b)=>a-b);
     return '<button type="button" class="insp-tool'+(t?'':' miss')+'" data-n="'+n+'"><b>T'+n+'</b><span class="it-n">'+(t?esc(t.name):'Finns inte i magasinet')+'</span><span class="it-d">'+(t?'Ø'+nf(t.d)+' · L '+nf(t.h||0,0)+(t.angle?' · '+t.angle+'°':''):'Lägg in ett verktyg på plats T'+n)+'</span><span class="it-l">rad '+ln.slice(0,8).join(', ')+(ln.length>8?' …':'')+'</span></button>';}).join('')
@@ -8492,7 +8537,7 @@ function cur(){const g=typeof stockGrid!=='undefined'&&stockGrid&&!stockGrid.box
   if(g)return {x0:g.minX,x1:g.maxX,y0:g.minY,y1:g.maxY,z0:g.bottom,zt:g.top};
   const S=stockSize,w=S.width,d=S.depth;return {x0:-w/2,x1:w/2,y0:-d/2,y1:d/2,z0:-(S.thickness||20),zt:0};}
 function apply(){saveJSON('gkodviz_stocksize_v1',stockSize);try{if(stockMode&&typeof removeStockMesh==='function'&&webgl)removeStockMesh();}catch(e){}drawFromText(false);drawStock();}
-function drawStock(){const box=$('inspStock'),S=stockSize,c=cur(),cyl=S.shape==='cylinder';
+function drawStock(){if(window.GV_SVARV&&window.gvLathe)return gvLathe.stockUI($('inspStock'));const box=$('inspStock'),S=stockSize,c=cur(),cyl=S.shape==='cylinder';
   const inp=(id,v,lab)=>'<label class="insp-f"><span>'+lab+'</span><input type="number" step="0.1" id="'+id+'" value="'+(+(+v).toFixed(3))+'"></label>';
   box.innerHTML='<div class="insp-row2">'+inp('isX0',c.x0,'X från')+inp('isX1',c.x1,'X till')+inp('isY0',c.y0,'Y från')+inp('isY1',c.y1,'Y till')+inp('isZ0',c.z0,'Z botten')+inp('isZT',c.zt,'Z råyta')+'</div>'
    +'<label class="insp-chk"><input type="checkbox" id="isAuto"'+(S.auto?' checked':'')+'> Automatisk storlek efter banan</label>'
@@ -8767,7 +8812,8 @@ if(introOn&&!window.__gvSkipIntro&&!/[?&]utanintro=1/.test(location.search))star
 <script>
 /* ---------- spara: autosparning i webbläsaren, Spara skriver tillbaka till samma fil, och sparar när skärmsläckaren startar ---------- */
 (function(){
-const LSK='gvis-kod-v1';
+const LSK0='gvis-kod-v1',LSKV='gvis-kod-svarv-v1';
+Object.defineProperty(window,'__gvLSK',{get:()=>window.GV_SVARV?LSKV:LSK0});
 const FS=!!(window.showSaveFilePicker&&window.showOpenFilePicker);   // Chrome och Edge: skriva direkt till filen
 const T_NC=[{description:'G-kod',accept:{'text/plain':['.nc','.tap','.ngc','.txt','.cnc','.gcode','.h','.mpf']}}];
 const T_GVIS=[{description:'G-vis-fil (G-kod, verktyg, ämne och material)',accept:{'text/plain':['.gvis']}}];
@@ -8783,7 +8829,7 @@ const base=n=>(n||'program').replace(/\.[^.]+$/,'')||'program';
 function setupLine(){return '(GKODVIZ:SETUP:'+utf8ToBase64(JSON.stringify({v:1,tools:toolTable,stock:stockSize,mat:(typeof phSettings!=='undefined'?phSettings.mat:null)}))+')\n';}
 function fileText(name){let t=ta.value;if(!isGvis(name===undefined?fileName:name))return t;try{t=setupLine()+t;}catch(e){}return t;}
 window.gvFileText=fileText;window.gvSetupLine=setupLine;
-function saveLocal(){if(kurs())return;try{localStorage.setItem(LSK,JSON.stringify({code:ta.value,fileName,t:Date.now()}));}catch(e){}}
+function saveLocal(){if(kurs())return;try{localStorage.setItem(window.__gvLSK,JSON.stringify({code:ta.value,fileName,t:Date.now()}));}catch(e){}}
 function label(){return (handle?'📄 ':'')+fileName+(dirty?' •':'');}
 function mark(d){dirty=d;const el=document.getElementById('rtFileName');if(el){el.textContent=label();el.title=dirty?'Ändrad sedan den sparades'+(handle?' till filen':''):(handle?'Sparad till filen på datorn':'Sparas automatiskt i webbläsaren');}}
 window.gvFileLabel=label;
@@ -8829,7 +8875,7 @@ async function openPending(){const T=window.__TAURI__;if(!T||!T.core)return;let 
   statusEl.textContent='Öppnade '+f.name+'. Spara (Ctrl+S) skriver tillbaka till filen.';}
 window.gvOpenPending=openPending;
 /* öppna det som sparades senast */
-try{const s=JSON.parse(localStorage.getItem(LSK)||'null');if(s&&typeof s.code==='string'&&s.code.trim()){quiet=true;_load(s.code);quiet=false;fileName=s.fileName||'program.gvis';}}catch(e){quiet=false;}
+try{const s=JSON.parse(localStorage.getItem(window.__gvLSK)||'null');if(s&&typeof s.code==='string'&&s.code.trim()){quiet=true;_load(s.code);quiet=false;fileName=s.fileName||'program.gvis';}}catch(e){quiet=false;}
 mark(false);
 if(window.__TAURI__&&window.__TAURI__.core)setTimeout(openPending,0);
 })();
