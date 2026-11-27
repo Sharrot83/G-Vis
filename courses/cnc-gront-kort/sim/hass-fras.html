@@ -2,6 +2,7 @@
 <html lang="sv">
 <head>
 <script src="../i18n/i18n.js"></script>
+<script src="tema.js" data-keep=".panel"></script>
 <script src="lexfonster.js" defer></script>
 <script src="../i18n/en-gvis.js"></script>
 <script src="../i18n/en-fysik.js"></script>
@@ -2877,7 +2878,7 @@ catch(e){document.getElementById('vfail').hidden=false;throw e;}
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
 host.appendChild(renderer.domElement);
 renderer.domElement.style.cssText='position:absolute;inset:0;width:100%;height:100%;display:block';
-const scene=new THREE.Scene();scene.background=new THREE.Color(0x16191d);
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x16191d);if(window.simTema)simTema.bg(scene,0x16191d,0xd3d7db);
 const cam=new THREE.PerspectiveCamera(38,1,5,30000);
 const controls=new OrbitControls(cam,renderer.domElement);
 controls.enablePan=false;controls.enableDamping=true;controls.dampingFactor=0.12;

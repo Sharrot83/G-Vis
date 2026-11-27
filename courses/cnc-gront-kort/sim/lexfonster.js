@@ -10,13 +10,17 @@ const css=document.createElement('style');css.textContent=`
 .lxw-bar button{background:none;border:0;color:inherit;font-size:15px;cursor:pointer;padding:2px 7px;border-radius:4px}
 .lxw-bar button:hover{background:rgba(255,255,255,.15)}
 .lxw iframe{flex:1;width:100%;border:0;background:#101318}
-.lxw.drag iframe{pointer-events:none}`;
+.lxw.drag iframe{pointer-events:none}
+html[data-theme="light"] .lxw{background:#f6f8fa;border-color:#c9d2db;box-shadow:0 24px 70px rgba(0,0,0,.25)}
+html[data-theme="light"] .lxw iframe{background:#f6f8fa}`;
 document.head.appendChild(css);
+if(!document.documentElement.getAttribute('data-theme')){let t='dark';try{t=localStorage.getItem('cnc-tema')||'dark';}catch(e){}document.documentElement.setAttribute('data-theme',t);}
 let W=null,fr=null;
 const T=s=>(window.cncT||String)(s);
 function make(){W=document.createElement('div');W.className='lxw';W.hidden=true;W.setAttribute('role','dialog');W.setAttribute('aria-label',T('Lexikon'));
   W.innerHTML='<div class="lxw-bar"><span>'+T('Lexikon')+'</span><button type="button" data-a="tab" title="'+T('Öppna lexikonet i en egen flik')+'">↗</button><button type="button" data-a="x" aria-label="'+T('Stäng')+'">✕</button></div><iframe title="'+T('Lexikon')+'"></iframe>';
-  document.body.appendChild(W);fr=W.querySelector('iframe');
+  document.documentElement.appendChild(W);fr=W.querySelector('iframe');   // utanför body, så att ljusa lägets färgvändning inte påverkar fönstret
+  fr.addEventListener('load',()=>{try{fr.contentDocument.documentElement.setAttribute('data-theme',document.documentElement.getAttribute('data-theme')||'dark');}catch(e){}});
   W.querySelector('[data-a=x]').onclick=()=>{W.hidden=true;};
   W.querySelector('[data-a=tab]').onclick=()=>{let h='';try{h=fr.contentWindow.location.hash;}catch(e){}window.open('../lexikon.html'+h,'_blank');};
   // flytta i titelraden

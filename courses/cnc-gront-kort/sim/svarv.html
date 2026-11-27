@@ -381,6 +381,7 @@
     <div id="center">
       <header id="topbar">
 <script src="../i18n/i18n.js"></script>
+<script src="tema.js"></script>
 <script src="lexfonster.js" defer></script>
 <script src="../i18n/en-gvis.js"></script>
 <script src="../i18n/en-fysik.js"></script>
@@ -513,6 +514,7 @@
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x26343a);
     scene.fog = new THREE.Fog(0x26343a, 90, 650);
+    if(window.simTema)simTema.bg(scene,0x26343a,0xcdd5da);
     const camera = new THREE.PerspectiveCamera(43, vw() / vh(), .1, 900);
     camera.position.set(13, 6.5, -3); camera.lookAt(0, -.5, 0);
     const renderer = new THREE.WebGLRenderer({ antialias:true, powerPreference:'high-performance' });
@@ -1390,11 +1392,11 @@
     const CN3={}; window.__cnc=cnc;
     { const host=document.querySelector('#cScene'), PHI=50*Math.PI/180, sP=Math.sin(PHI), cP=Math.cos(PHI);
       const XA=new THREE.Vector3(1,0,0), UA=new THREE.Vector3(0,sP,-cP), NA_=new THREE.Vector3(0,cP,sP);
-      const sc=new THREE.Scene(); sc.background=new THREE.Color(0x0a1319); sc.fog=new THREE.Fog(0x0a1319,60,140);
-      const cam=new THREE.PerspectiveCamera(38,1,.1,400); cam.position.set(20,12,44);
+      const sc=new THREE.Scene(); sc.background=new THREE.Color(0x0a1319); sc.fog=new THREE.Fog(0x0a1319,90,190); if(window.simTema)simTema.bg(sc,0x0a1319,0xd3dade);
+      const cam=new THREE.PerspectiveCamera(26,1,.1,500); cam.position.set(29,16.5,62);   // smalt synfält: skäret och snittet syns på samma ställe
       const rd=new THREE.WebGLRenderer({antialias:true}); rd.setPixelRatio(Math.min(devicePixelRatio||1,2)); host.appendChild(rd.domElement);
       rd.domElement.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;display:block';
-      const ctl=new OrbitControls(cam,rd.domElement); ctl.target.set(-1,0,-2); ctl.enableDamping=true; ctl.dampingFactor=.06; ctl.minDistance=6; ctl.maxDistance=90; ctl.maxPolarAngle=Math.PI*.55;
+      const ctl=new OrbitControls(cam,rd.domElement); ctl.target.set(-1,0,-2); ctl.enableDamping=true; ctl.dampingFactor=.06; ctl.minDistance=6; ctl.maxDistance=130; ctl.maxPolarAngle=Math.PI*.55;
       sc.add(new THREE.HemisphereLight(0xdfeaf2,0x1a2630,.9)); const dl=new THREE.DirectionalLight(0xffffff,1.1); dl.position.set(12,24,18); sc.add(dl);
       const pl=new THREE.PointLight(0xfff2d8,.9,60); pl.position.set(0,8,6); sc.add(pl);
       const MAT=(c,m=.35,r=.55,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,metalness:m,roughness:r},o));
@@ -1453,6 +1455,9 @@
         return worst; };
       const refreshStock=()=>{ if(!dirty)return; dirty=false; const W=NAZ+1;
         for(let i=0;i<=NS;i++){ const x=(i<NS?zS(i):.02)/10, r=rad[i]/10; for(let j=0;j<=NAZ;j++){ const a=j/NAZ*2*Math.PI, o=(i*W+j)*3; pos[o]=x; pos[o+1]=r*Math.cos(a); pos[o+2]=r*Math.sin(a); } }
+        // svarvad yta blank och ljus, råämnet mörkare: då syns tydligt var skäret har gått
+        const R0=cnc.dia/2-.02; for(let i=0;i<=NS;i++){ const cut=i<NS&&rad[i]<R0, k=cut?1.12:.62; for(let j=0;j<=NAZ;j++){ const sh=(Math.floor(j/4)%2)?.86:1, o=(i*W+j)*3, v=Math.min(1,k*sh); col[o]=col[o+1]=col[o+2]=v; } }
+        stockMesh.geometry.attributes.color.needsUpdate=true;
         stockMesh.geometry.attributes.position.needsUpdate=true; stockMesh.geometry.computeVertexNormals(); };
       CN3.reset=()=>{ cnc.x=100; cnc.z=50; cnc.offX=0; cnc.offZ=0; cnc.alarm=''; cnc.tool=1; CN3.buildStock(); };
       // placering av verktyg/revolver varje frame
@@ -1637,7 +1642,7 @@
         const tb='<g font-family="Arial,sans-serif" font-size="10" fill="'+ink+'"><rect x="'+(W-250)+'" y="'+(H-62)+'" width="244" height="56" fill="#fff" stroke="'+ink+'"/><line x1="'+(W-250)+'" y1="'+(H-44)+'" x2="'+(W-6)+'" y2="'+(H-44)+'" stroke="'+ink+'"/><text x="'+(W-244)+'" y="'+(H-48)+'" font-size="12" font-weight="bold">DETALJ '+idx+' — CNC-SVARV</text><text x="'+(W-244)+'" y="'+(H-30)+'">Material: stål (7,85 g/cm³)   Volym: '+f2(a.vol)+' cm³</text><text x="'+(W-244)+'" y="'+(H-16)+'">Massa ≈ '+f2(a.mass)+' g   Mått i mm   Skala ≈ '+s.toFixed(1)+':1</text></g>';
         return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" width="100%" style="background:#fff;border-radius:6px;display:block"><rect width="'+W+'" height="'+H+'" fill="#fff"/>'+g+tb+'</svg>'; }
       // ---------- 3D-vy ----------
-      const sc=new THREE.Scene(); sc.background=new THREE.Color(0x0d1a22); const cam=new THREE.PerspectiveCamera(35,1,.1,200);
+      const sc=new THREE.Scene(); sc.background=new THREE.Color(0x0d1a22); if(window.simTema)simTema.bg(sc,0x0d1a22,0xe3e8eb); const cam=new THREE.PerspectiveCamera(35,1,.1,200);
       const rd=new THREE.WebGLRenderer({antialias:true}); rd.setPixelRatio(Math.min(devicePixelRatio||1,2)); host.appendChild(rd.domElement); rd.domElement.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;display:block';
       const ctl=new OrbitControls(cam,rd.domElement); ctl.enableDamping=true; ctl.dampingFactor=.08; ctl.autoRotate=true; ctl.autoRotateSpeed=2.2; ctl.addEventListener('start',()=>{ctl.autoRotate=false;});
       sc.add(new THREE.HemisphereLight(0xdfeaf2,0x1a2630,1.0)); const dl=new THREE.DirectionalLight(0xffffff,1.2); dl.position.set(4,6,5); sc.add(dl); const dl2=new THREE.DirectionalLight(0x9fd8ff,.5); dl2.position.set(-5,-2,-4); sc.add(dl2);
