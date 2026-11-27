@@ -7036,7 +7036,7 @@ function menus(){const L=[
    {l:'Hastighet',sub:[0.5,1,2,4].map(v=>({l:String(v).replace('.',',')+'×',c:()=>Math.abs(parseFloat($('speedSlider').value)-v)<1e-6,a:()=>{const e=$('speedSlider');e.value=v;e.dispatchEvent(new Event('input'));}}))},
    {sep:1},{l:'Hemposition …',a:click('homepos')},{l:'Rita ämnet med grafikkortet (snabbare)',c:()=>!window.gvGpu||gvGpu.on,a:()=>gvGpu.set(!gvGpu.on)},{l:'Ämnets upplösning',sub:[{hd:'Ämnets upplösning'}].concat(Object.entries(STOCK_RES_OPTS).map(([k,r])=>({l:r.name+(k==='n'?' (snabbast)':k==='h'?' (2× fler punkter)':' (3,5× fler punkter)'),c:()=>stockResKey===k,a:()=>{statusEl.textContent='Bygger om ämnet …';setTimeout(()=>setStockRes(k),30);}}))).concat([{note:'Hög och Ultra ger skarpare kanter, finare ytor och tydligare fräsmärken men kräver mer av datorn. Börja med Normal om datorn är äldre.'}])},{l:'Dialekt',sub:[['fanuc','Fanuc'],['haas','Hass'],['linuxcnc','LinuxCNC'],['iso','ISO (DIN 66025)']].map(([k,n])=>({l:n,c:()=>window.RITA_DIALECT===k,a:()=>{const s=document.getElementById('rtDialect');s.value=k;s.dispatchEvent(new Event('change'));}}))},{l:'Fysik: kraft, brott och värme',...chkBox('cncPhysOn')},
    {l:'Ljud',c:()=>!!(window.CNCLJUD&&CNCLJUD.on),a:()=>{if(window.CNCLJUD)CNCLJUD.setOn(!CNCLJUD.on);}}]},
- {t:'Verktyg',i:[{l:'Verktygsmagasin …',k:'Ctrl+M',a:()=>window.ritaMagOpen&&window.ritaMagOpen()},{l:'Lathund G/M …',a:click('cheatsheetBtn')},{l:'Lathund skärdata …',a:click('skardataBtn')}]},
+ {t:'Verktyg',i:[{l:window.GV_SVARV?'Revolver …':'Verktygsmagasin …',k:'Ctrl+M',a:()=>window.ritaMagOpen&&window.ritaMagOpen()},{l:'Lathund G/M …',a:click('cheatsheetBtn')},{l:'Lathund skärdata …',a:click('skardataBtn')}]},
  {t:'Kurser',i:(window.ritaKursMenu?window.ritaKursMenu():[{l:'Kurserna laddas …',dis:true}])},
  {t:'Lexikon',i:[{hd:'Handbok'},{l:'Verktyg',a:lex('verktyg')},{l:'3D-simulering',a:lex('simulering')},{l:'Skärdata',a:lex('grunder')},{l:'Manuell G-kod',a:lex('gkod')},
    {hd:'Uppslag'},{l:'G-koder',a:lex('g-koder')},{l:'M-koder',a:lex('m-koder')},{l:'Adressbokstäver',a:lex('adresser')},{l:'Formler och begrepp',a:lex('formler')},{sep:1},{l:'Källor',a:lex('kallor')}]},
@@ -7150,8 +7150,9 @@ function tlBuild(){
   const bar=$('rtTimeline');TL=[];
   if(!paths||!paths.length||!playModel){bar.innerHTML='';$('rtTlTime').textContent='';return;}
   const L=ta.value.split('\n'),isoM=iso();
-  $('rtTlHint').textContent=isoM?'Nytt block vid G17 (verktygsanrop i ISO-kod)':'Nytt block vid verktygsbyte (M6/M06)';
-  const trig=[];L.forEach((t,i)=>{const u=t.replace(/\(.*?\)/g,'').replace(/;.*/,'').toUpperCase();if(isoM?(/G0*17(?![\d.])/.test(u)&&/T\s*\d/.test(u)&&!/G0*99(?![\d.])/.test(u)):/M0*6(?![\d.])/.test(u))trig.push(i+1);});
+  const sv=!!window.GV_SVARV;
+  $('rtTlHint').textContent=sv?'Nytt block vid verktygsbyte (T0101, T0202 …)':isoM?'Nytt block vid G17 (verktygsanrop i ISO-kod)':'Nytt block vid verktygsbyte (M6/M06)';
+  const trig=[];L.forEach((t,i)=>{const u=t.replace(/\(.*?\)/g,'').replace(/;.*/,'').toUpperCase();if(sv?/(^|[^A-Z])T\s*\d/.test(u):isoM?(/G0*17(?![\d.])/.test(u)&&/T\s*\d/.test(u)&&!/G0*99(?![\d.])/.test(u)):/M0*6(?![\d.])/.test(u))trig.push(i+1);});
   const blockOf=line=>{let k=0;while(k<trig.length&&trig[k]<=line)k++;return k;};
   paths.forEach((sg,i)=>{const k=blockOf(sg.line||0);const last=TL[TL.length-1];
     if(!last||last.k!==k)TL.push({k,s0:i,s1:i});else last.s1=i;});
@@ -7380,7 +7381,7 @@ $('magClearAll').onclick=()=>{if(!$('magClearAll').dataset.arm){$('magClearAll')
   delete $('magClearAll').dataset.arm;$('magClearAll').textContent='Töm magasinet';toolTable=[];changed();};
 MW.addEventListener('mousedown',e=>{if(e.target===MW)close();});
 document.addEventListener('keydown',e=>{if(!MW.hidden&&e.key==='Escape'){e.preventDefault();close();}
-  if((e.ctrlKey||e.metaKey)&&!e.altKey&&e.key.toLowerCase()==='m'){e.preventDefault();MW.hidden?open():close();}});
+  if((e.ctrlKey||e.metaKey)&&!e.altKey&&e.key.toLowerCase()==='m'){e.preventDefault();if(window.GV_SVARV&&window.gvLathe&&gvLathe.turretWin)return gvLathe.turretWin();MW.hidden?open():close();}});
 /* flytta fönstret i titelraden och ändra storlek i kanterna (som Spånlex) */
 {const box=MW.querySelector('.ed-win-box'),bar=MW.querySelector('.ed-win-bar');let d=null;
  bar.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;const r=box.getBoundingClientRect();d={x:e.clientX-r.left,y:e.clientY-r.top};bar.setPointerCapture(e.pointerId);});

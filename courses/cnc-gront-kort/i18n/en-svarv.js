@@ -1,7 +1,7 @@
 /* English for the lathe mode in G-vis (g-vis-svarv.js). */
 (function(){if(!window.cncI18n)return;
 window.cncI18n.add({exact:{
-'Svarv':'Lathe','Fräs':'Mill','Byt till fräs':'Switch to mill','Byt till svarv':'Switch to lathe','Hass svarv':'Hass lathe','Fräsläge.':'Mill mode.',
+'Svarv':'Lathe','Revolver …':'Turret …','Revolver':'Turret','Ändra revolvern …':'Edit the turret …','Svarvens verktyg. T0101 i programmet tar verktyg 1 med korrigering 1. Ändringarna sparas på datorn.':'The lathe tools. T0101 in the program calls tool 1 with offset 1. Changes are saved on this computer.','Typ':'Type','Namn':'Name','Nosradie mm':'Nose radius mm','Bredd / Ø mm':'Width / Ø mm','Lägg till verktyg':'Add tool','Återställ standard':'Reset to default','Svarvstål':'Turning tool','Revolvern har 12 platser.':'The turret has 12 stations.','Svarvstål (utvändigt)':'Turning tool (external)','Spårstål / avstickare':'Grooving / parting tool','Gängstål':'Threading tool','Borr':'Drill','Borrstång (invändigt)':'Boring bar (internal)','Nytt block vid verktygsbyte (T0101, T0202 …)':'New block at each tool change (T0101, T0202 …)','Fräs':'Mill','Byt till fräs':'Switch to mill','Byt till svarv':'Switch to lathe','Hass svarv':'Hass lathe','Fräsläge.':'Mill mode.',
 'Svarvläge: X är diameter och Z går längs axeln. Koden tolkas som Hass svarv.':'Lathe mode: X is the diameter and Z runs along the axis. The code is read as Hass lathe code.',
 'Rad':'Line','och N':'and N','verktyget T':'tool T','finns inte i revolvern.':'is not in the turret.','finns inte i revolvern':'not in the turret',
 'bågen går inte ihop. Kontrollera R eller I och K.':'the arc does not close. Check R or I and K.',
