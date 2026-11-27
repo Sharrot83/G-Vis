@@ -4,7 +4,6 @@
 <script src="i18n/i18n.js"></script>
 <script src="i18n/en-gvis.js"></script>
 <script src="i18n/en-svarv.js"></script>
-<script src="g-vis-svarv.js"></script>
 <script src="i18n/en-fysik.js"></script>
 <script src="i18n/en-kod.js"></script>
 <script src="i18n/en-kurser.js"></script>
@@ -7887,7 +7886,7 @@ function kFeeds(list){const E=.05,eq=(a,b)=>Math.abs(a[0]-b[0])<E&&Math.abs(a[1]
 /* kontroll av Z: ned med G01, sidled bara över ämnet, rätt kontur på varje djup, ramp eller helix, upp efteråt */
 function kEvalZ(L){const els=((R&&R.els)||[]).filter(e=>e.xy),nfz=v=>String(Math.round(v*100)/100).replace('.',',').replace('-','−');
  if(!els.length)return {score:0,ok:false,msgs:[{k:'tip',t:'Skriv rörelserna. Börja med att gå ned i materialet med G01.'}]};
- for(const e of els){if(!e.rapid)continue;const lo=Math.min(e.p0[2],e.p1[2]),xy=Math.hypot(e.p1[0]-e.p0[0],e.p1[1]-e.p0[1]);
+ for(const e of els){if(!e.rapid||L.flat)continue;const lo=Math.min(e.p0[2],e.p1[2]),xy=Math.hypot(e.p1[0]-e.p0[0],e.p1[1]-e.p0[1]);
   if(lo<-0.01&&e.p1[2]<e.p0[2]-1e-6)return {score:5,ok:false,msgs:[{k:'err',t:`Rad ${e.li+1} går ned i materialet med G00 till Z${nfz(e.p1[2])}. Gå ned med G01 och en lugn matning, till exempel G01 Z${nfz(e.p1[2])} F100.`}]};
   if(xy>0.01&&Math.max(e.p0[2],e.p1[2])<=0.001)return {score:5,ok:false,msgs:[{k:'err',t:`Rad ${e.li+1} flyttar i sidled med G00 nere vid Z${nfz(e.p0[2])}, alltså i eller vid ämnet. Kör upp till säkerhetshöjden först, till exempel G00 Z5.`}]};}
  // ingången: ramp eller helix
@@ -7901,16 +7900,16 @@ function kEvalZ(L){const els=((R&&R.els)||[]).filter(e=>e.xy),nfz=v=>String(Math
  for(let k=0;k<L.zs.length;k++){const d=L.zs[k],lvl=els.filter(e=>!e.rapid&&Math.abs(e.p0[2]-d)<.05&&Math.abs(e.p1[2]-d)<.05),feeds=kFeeds(lvl);
   for(let q=0;q<L.paths.length;q++){const P=L.paths[q],C={pts:P,arcs:(L.arcs&&L.arcs[q])||P.slice(1).map(()=>null)};
    const E=.05,st=feeds.findIndex(f=>Math.abs(f.a[0]-P[0][0])<E&&Math.abs(f.a[1]-P[0][1])<E);
-   const where=(L.zs.length>1?`på Z${nfz(d)}: `:'')+(L.paths.length>1?`spår ${q+1}: `:'');
-   if(st<0){const tot=L.zs.length*L.paths.length;return {score:Math.round(25+done/tot*70),ok:false,msgs:msgs.concat([{k:'tip',t:`${where}Nästa: fräs ${L.paths.length>1?'spåret':'konturen'} på djupet Z${nfz(d)} med start i ${kfmt(P[0])}.`}])};}
+   const where=(L.zs.length>1?`på Z${nfz(d)}: `:'')+(L.paths.length>1?(L.flat?`detalj ${q+1}: `:`spår ${q+1}: `):'');
+   if(st<0){const tot=L.zs.length*L.paths.length;return {score:Math.round(25+done/tot*70),ok:false,msgs:msgs.concat([{k:'tip',t:L.flat?`${where}Nästa: rita detaljen med start i ${kfmt(P[0])}.`:`${where}Nästa: fräs ${L.paths.length>1?'spåret':'konturen'} på djupet Z${nfz(d)} med start i ${kfmt(P[0])}.`}])};}
    let chain=[feeds[st]];for(let m=st+1;m<feeds.length&&Math.abs(feeds[m].a[0]-chain[chain.length-1].b[0])<E&&Math.abs(feeds[m].a[1]-chain[chain.length-1].b[1])<E;m++)chain.push(feeds[m]);
    chain=chain.slice(0,P.length-1);
    const r=kEvalArc(C,chain,[]);
    if(!r.ok){const tot=L.zs.length*L.paths.length;return {score:Math.round(25+done/tot*70),ok:false,msgs:msgs.concat(r.msgs.filter(m=>m.k!=='ok').map(m=>({k:m.k,t:where+m.t})))};}
    done++;}}
- msgs.push({k:'ok',t:L.zs.length>1?`Konturen är fräst på alla ${L.zs.length} djupen.`:(L.paths.length>1?`Båda spåren är frästa på Z${nfz(L.zs[0])}.`:`Banan på Z${nfz(L.zs[0])} följer ritningen.`)});
+ msgs.push({k:'ok',t:L.flat?'Båda detaljerna följer ritningen.':L.zs.length>1?`Konturen är fräst på alla ${L.zs.length} djupen.`:(L.paths.length>1?`Båda spåren är frästa på Z${nfz(L.zs[0])}.`:`Banan på Z${nfz(L.zs[0])} följer ritningen.`)});
  const last=els[els.length-1];
- if(last.p1[2]<1-1e-6)return {score:95,ok:false,msgs:msgs.concat([{k:'tip',t:'Kör upp till säkerhetshöjden när du är klar, till exempel G00 Z5.'}])};
+ if(!L.flat&&last.p1[2]<1-1e-6)return {score:95,ok:false,msgs:msgs.concat([{k:'tip',t:'Kör upp till säkerhetshöjden när du är klar, till exempel G00 Z5.'}])};
  if(L.entry==='ramp')msgs.push({k:'ok',t:'Fräsen rampar ned i stället för att borra rakt ned.'});
  if(L.entry==='helix')msgs.push({k:'ok',t:'Fräsen går ned i en helix.'});
  return {score:100,ok:true,msgs};}
@@ -8012,11 +8011,11 @@ KURSER.push({id:'kn',name:'Kurs 2 · Nollpunkter och G91',intro:{"om": "Ibland �
   text:'En maskin har flera nollpunkter, G54 till G59. Varje nollpunkt är ett ställe på maskinbordet som operatören har mätt upp. Med två detaljer på bordet kan samma program köras på båda genom att bara byta nollpunkt. Här ligger G55 40 mm till höger om G54.',
   task:'Fräs rektangeln 30 × 20 med nedre vänstra hörnet i X0 Y10, medurs, men räknat från nollpunkten G55. Den ritas då 40 mm till höger.',start:KH(2,3,'G55'),
   hint:'Välj nollpunkten först. Sedan skriver du rektangeln som vanligt, med mått från den nya nollpunkten.',answer:'G55\nG00 X0 Y10\nG01 X0 Y30\nG01 X30 Y30\nG01 X30 Y10\nG01 X0 Y10'},
- {short:'Två detaljer',t:'Samma detalj på två ställen',type:'z',wcs:{2:{x:40,y:0}},paths:[[[0,10],[0,30],[30,30],[30,10],[0,10]],[[40,10],[40,30],[70,30],[70,10],[40,10]]],zs:[-1],need:[['G54','Fräs den första detaljen i G54.'],['G55','Fräs den andra detaljen i G55.']],
-  text:'Nu körs samma rader två gånger, en gång i varje nollpunkt. Mellan detaljerna kör verktyget upp till säkerhetshöjden.',
-  task:'Fräs rektangeln 30 × 20 med hörnet i X0 Y10, 1 mm djup, först i G54 och sedan samma rader i G55.',start:KH(2,4,'TVA DETALJER'),
-  hint:'Fräs detaljen med G54. Byt sedan till G55 och skriv exakt samma rader igen. Det är nollpunkten som flyttar detaljen.',
-  answer:'G54\nG00 X0 Y10 Z5\nG01 Z-1 F100\nG01 X0 Y30 F300\nG01 X30 Y30\nG01 X30 Y10\nG01 X0 Y10\nG00 Z5\nG55\nG00 X0 Y10 Z5\nG01 Z-1 F100\nG01 X0 Y30 F300\nG01 X30 Y30\nG01 X30 Y10\nG01 X0 Y10\nG00 Z5'},
+ {short:'Två detaljer',t:'Samma detalj på två ställen',type:'z',flat:true,wcs:{2:{x:40,y:0}},paths:[[[0,10],[0,30],[30,30],[30,10],[0,10]],[[40,10],[40,30],[70,30],[70,10],[40,10]]],zs:[0],need:[['G54','Rita den första detaljen i G54.'],['G55','Rita den andra detaljen i G55.']],
+  text:'Nu körs samma rader två gånger, en gång i varje nollpunkt. Mellan detaljerna flyttar verktyget med G00 till nästa startpunkt.',
+  task:'Rita rektangeln 30 × 20 med hörnet i X0 Y10, först i G54 och sedan samma rader i G55.',start:KH(2,4,'TVA DETALJER'),
+  hint:'Rita detaljen med G54. Byt sedan till G55 och skriv exakt samma rader igen. Det är nollpunkten som flyttar detaljen.',
+  answer:'G54\nG00 X0 Y10\nG01 X0 Y30\nG01 X30 Y30\nG01 X30 Y10\nG01 X0 Y10\nG55\nG00 X0 Y10\nG01 X0 Y30\nG01 X30 Y30\nG01 X30 Y10\nG01 X0 Y10'},
  {short:'Slutprov',t:'Slutprov: G55 och G91',type:'path',wcs:{2:{x:40,y:0}},open:true,pts:[[40,10],[50,10],[50,20],[60,20],[60,30],[70,30]],need:[['G55','Välj nollpunkten G55.'],['G91','Rita trappan med G91.'],['G90#after','Slå på G90 igen efteråt.']],
   text:'Allt tillsammans: en annan nollpunkt och inkrementella mått.',
   task:'Fräs en trappa med tre steg på 10 mm i nollpunkten G55. Den börjar i X0 Y10 räknat från G55, går 10 åt höger, 10 upp och så vidare och slutar med 10 åt höger. Använd G91 för stegen.',start:KH(2,5,'SLUTPROV'),

@@ -33,7 +33,7 @@ G-vis comes with a **tool lexicon** and **simulators** for a vertical mill and t
 - **Live toolpath** in 2D and 3D: rapids, feed moves, arcs, cutter compensation lead-ins and canned cycles.
 - **Explain line:** click any line, and every G code, M code and address on it is explained in plain language, including the cutting speed for the programmed spindle speed.
 - **Warnings** for common mistakes: missing feed, compensation on an arc, a cycle that is never cancelled, missing tools and more.
-- **Lathe mode:** switch between mill and lathe with the button next to the logo. Hass lathe code with X as diameter: `G90`/`G94` turning and facing cycles, `G71`/`G70` roughing and finishing, `G76` threading, grooving, drilling and boring, `G96` constant surface speed with `G50` max rpm. The bar is turned in 2D and 3D.
+- **Lathe mode** (in the Workshop add-on in the Microsoft Store app): switch between mill and lathe with the button next to the logo. Hass lathe code with X as diameter: `G90`/`G94` turning and facing cycles, `G71`/`G70` roughing and finishing, `G76` threading, grooving, drilling and boring, `G96` constant surface speed with `G50` max rpm. The bar is turned in 2D and 3D.
 - **Light and dark mode** for the whole window, including the editor and the view.
 - **Dialects:** Fanuc, Hass, LinuxCNC and ISO (DIN 66025), with a converter that rewrites a program from one dialect to another.
 - **Subprograms:** `M98 P… L…` with `M99`, nested up to four levels, and Hass `M97`.
